@@ -14,8 +14,10 @@ cd adpeeper
 python3 -m venv venv
 source venv/bin/activate
 pip install .
-export ADP_ENV_FILE=$(pwd)/deploy/config/defaults.env
-export ADP_SALT=$(adp gen_salt -r)
+cp $(pwd)/deploy/config/defaults.env $(pwd)/deploy/config/local.env
+export ADP_ENV_FILE=$(pwd)/deploy/config/local.env
+ADP_SALT=$(adp gen_salt -r)
+echo "ADP_SALT=$ADP_SALT" >> $ADP_ENV_FILE
 adp run
 ```
 
