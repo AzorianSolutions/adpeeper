@@ -13,7 +13,7 @@ git clone https://github.com/AzorianSolutions/adpeeper.git
 cd adpeeper
 python3 -m venv venv
 source venv/bin/activate
-pip install .
+pip install -e .
 cp $(pwd)/deploy/config/defaults.env $(pwd)/deploy/config/local.env
 export ADP_ENV_FILE=$(pwd)/deploy/config/local.env
 ADP_SALT=$(adp gen_salt -r)
@@ -21,7 +21,7 @@ ADP_SECRET_KEY=$(adp gen_salt -r)
 echo "" >> $ADP_ENV_FILE
 echo "ADP_SALT=$ADP_SALT" >> $ADP_ENV_FILE
 echo "ADP_SECRET_KEY=$ADP_SECRET_KEY" >> $ADP_ENV_FILE
-ADP_ENV_FILE=$(pwd)/deploy/config/local.env adp run
+adp run
 ```
 
 ## Project Documentation
