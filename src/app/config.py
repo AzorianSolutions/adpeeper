@@ -1,7 +1,7 @@
 import os
 import yaml
 from pathlib import Path
-from pydantic import BaseSettings, MongoDsn
+from pydantic import BaseSettings
 
 ROOT_PATH: Path = Path(__file__).parent.parent.parent
 """ The root path of the application which is typically the project repository root path. """
