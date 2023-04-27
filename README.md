@@ -6,7 +6,7 @@ in third-party systems.
 ## TL;DR
 
 To get started quickly with a simple deployment, execute the following `bash` commands on a *nix based system
-with `git` and `python3` installed:
+with `git`, `python3`, `python3-pip`, and `python3-venv` installed:
 
 ```
 git clone https://github.com/AzorianSolutions/adpeeper.git
