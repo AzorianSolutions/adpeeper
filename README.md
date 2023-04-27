@@ -17,8 +17,11 @@ pip install .
 cp $(pwd)/deploy/config/defaults.env $(pwd)/deploy/config/local.env
 export ADP_ENV_FILE=$(pwd)/deploy/config/local.env
 ADP_SALT=$(adp gen_salt -r)
+ADP_SECRET_KEY=$(adp gen_salt -r)
+echo "" >> $ADP_ENV_FILE
 echo "ADP_SALT=$ADP_SALT" >> $ADP_ENV_FILE
-adp run
+echo "ADP_SECRET_KEY=$ADP_SECRET_KEY" >> $ADP_ENV_FILE
+ADP_ENV_FILE=$(pwd)/deploy/config/local.env adp run
 ```
 
 ## Project Documentation
