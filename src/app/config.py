@@ -9,6 +9,12 @@ ROOT_PATH: Path = Path(__file__).parent.parent.parent
 SRC_PATH: Path = ROOT_PATH / 'src'
 """ The source path of the application which is typically the src directory within the ROOT_PATH. """
 
+DEFAULT_ENV_PATH: Path = Path('/etc/adpeeper/adpeeper.env')
+""" The default path to the environment file to load settings from. """
+
+DEFAULT_SECRETS_PATH: Path | None = None
+""" The default path to the secrets directory to load environment variable values from. """
+
 
 class AppSettings(BaseSettings):
     """ The application settings class that loads setting values from the application environment. """
@@ -31,9 +37,9 @@ class AppSettings(BaseSettings):
     debug: bool = False
     export_file_name: str = 'adp-workers-export'
     export_formats: list[str] = ['csv', 'json']  # csv, json
-    export_headers: tuple = ('Payroll Name', 'Associate ID', 'Hire Date', 'Termination Date', 'Status Effective Date',
-                             'Job Title Description', 'Reports To Legal Name', 'Location Description',
-                             'Work Contact: Work Phone')
+    export_headers: tuple | str = ('Payroll Name', 'Associate ID', 'Hire Date', 'Termination Date',
+                                   'Status Effective Date', 'Job Title Description', 'Reports To Legal Name',
+                                   'Location Description', 'Work Contact: Work Phone')
     export_interval: int = 1440  # 24 hours
     export_path: str = '/var/tmp/adpeeper'
     proxy_root: str = '/'
@@ -57,9 +63,21 @@ class AppSettings(BaseSettings):
         env_nested_delimiter = '__'
 
 
-def load_settings(env_file_path: str = '/etc/adpeeper/.env', env_file_encoding: str = 'UTF-8',
+def load_settings(env_file_path: str | None = None, env_file_encoding: str | None = None,
                   secrets_path: str | None = None) -> AppSettings:
     """ Loads an AppSettings instance based on the given environment file and secrets directory. """
+
+    # Extract the default environment file path from the environment if defined, otherwise use the default path
+    if env_file_path is None:
+        env_file_path = os.getenv('ADP_ENV_FILE', DEFAULT_ENV_PATH)
+
+    # Extract the default environment file encoding from the environment if defined, otherwise use the default value
+    if env_file_encoding is None:
+        env_file_encoding = os.getenv('ADP_ENV_FILE_ENCODING', 'UTF-8')
+
+    # Extract the default secrets directory path from the environment if defined, otherwise use the default path
+    if secrets_path is None:
+        secrets_path = os.getenv('ADP_ENV_SECRETS_DIR', DEFAULT_SECRETS_PATH)
 
     params: dict = {
         '_env_file': env_file_path,
@@ -148,8 +166,5 @@ def save_config(app_settings: AppSettings, config: dict[str, any]) -> bool:
     return True
 
 
-# Define the default environment file path to load settings from
-env_conf_path: str = os.getenv('ADP_ENV_FILE', '/etc/adpeeper/.env')
-
-# Load various settings from an environment file and the local environment
-settings: AppSettings = load_settings(env_conf_path)
+# Load application settings from the environment and environment configuration files
+settings: AppSettings = load_settings()
