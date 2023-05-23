@@ -3,4 +3,10 @@ __legacy
 *.egg-info
 *.pyc
 build
+production.env
+prod.env
+local.env
+stage.env
+development.env
+dev.env
 venv

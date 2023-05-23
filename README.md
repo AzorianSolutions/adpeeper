@@ -19,7 +19,29 @@ adp run
 
 ## TL;DR - Windows
 
-Coming soon!
+Start with checking out the project's official repository using git. The official repository can be
+cloned from `https://github.com/AzorianSolutions/adpeeper.git`.
+
+```
+cd C:/Path/To/Project/Root
+python3 -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+copy deploy\config\defaults.env deploy\config\local.env
+```
+
+Edit the default settings as needed in `deploy\config\local.env`.
+
+Then, run the following commands each time you want to activate the project for use:
+
+```
+cd C:/Path/To/Project/Root
+venv\Scripts\activate
+for /F %A in (deploy\config\local.env) do SET %A
+adp run
+```
+
+More detail coming eventually!
 
 ## Project Documentation
 
