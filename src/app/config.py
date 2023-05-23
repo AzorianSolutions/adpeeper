@@ -87,7 +87,7 @@ def load_settings(env_file_path: str | None = None, env_file_encoding: str | Non
         '_env_file_encoding': env_file_encoding,
     }
 
-    os.putenv('ADP_ENV_FILE', env_file_path)
+    os.putenv('ADP_ENV_FILE', str(env_file_path))
     os.putenv('ADP_ENV_FILE_ENCODING', env_file_encoding)
 
     if secrets_path is not None:
@@ -102,7 +102,7 @@ def load_settings(env_file_path: str | None = None, env_file_encoding: str | Non
 
         if valid:
             params['_secrets_dir'] = secrets_path
-            os.putenv('ADP_ENV_SECRETS_DIR', secrets_path)
+            os.putenv('ADP_ENV_SECRETS_DIR', str(secrets_path))
 
     # Load base app configuration settings from the given environment file and the local environment
     app_settings = AppSettings(**params)

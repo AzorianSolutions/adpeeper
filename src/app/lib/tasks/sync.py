@@ -38,13 +38,12 @@ class SyncTasks:
                 logger.error(f'Error requesting workers from ADP API: {e}')
 
         if isinstance(workers, list) and connected and response.status == AdStatic.STATUS_SUCCESS:
-            users_api = UsersAPI()
-            users: list[UserRecord] = users_api.build_users()
+            users: list[UserRecord] = UsersAPI.build_users()
 
             print(users)
 
             try:
-                users_api.sync_from_workers(workers)
+                UsersAPI.sync_from_workers(workers)
             except ADSyncError as e:
                 response.status = AdStatic.STATUS_ERROR
                 response.error = str(e)

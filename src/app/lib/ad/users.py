@@ -1,14 +1,15 @@
 from loguru import logger
 from pyad import adquery, pyad
 from app.config import settings
-from app.lib.ad.exceptions import ADSyncError
+from app.lib.ad.exceptions import ADMapError, ADSyncError
 from app.models.users import UserRecord
 from app.models.workers import WorkerRecord
 
 
 class UsersAPI:
-    
-    def get_users(self, params: dict = None) -> list:
+
+    @staticmethod
+    def get_users(params: dict = None) -> list:
         defaults: dict = {
             'attributes': ['employeeID', 'distinguishedName', 'samAccountName', 'displayName'],
             'base_dn': 'OU=Managed Users,OU=Managed Resources,DC=root,DC=local',
@@ -29,12 +30,13 @@ class UsersAPI:
 
         return users
 
-    def build_users(self) -> list[UserRecord]:
+    @staticmethod
+    def build_users() -> list[UserRecord]:
         records: list[UserRecord] = []
         params: dict = {
             'attributes': ['employeeID', 'distinguishedName', 'samAccountName', 'displayName'],
         }
-        users: list = self.get_users(params=params)
+        users: list = UsersAPI.get_users(params=params)
 
         for user in users:
             logger.trace(user)
@@ -50,6 +52,27 @@ class UsersAPI:
             logger.trace(f'Retrieved user record: {record.dict()}')
 
         return records
+
+    @staticmethod
+    def map_users(key: str, users: list[UserRecord]) -> dict[str, UserRecord]:
+        user_map: dict[str, UserRecord] = {}
+
+        if not isinstance(users, list):
+            raise TypeError('Users argument must be a list of UserRecord objects.')
+
+        if not len(users):
+            raise ValueError('Users argument must not be empty.')
+
+        for user in users:
+            if not isinstance(user, UserRecord):
+                raise TypeError('Users argument must be a list of UserRecord objects.')
+
+            if not hasattr(user, key):
+                raise ADMapError(f'UserRecord objects must have a {key} attribute.')
+
+            user_map[getattr(user, key)] = user
+
+        return user_map
 
     @staticmethod
     def sync_from_workers(records: list[WorkerRecord]):
