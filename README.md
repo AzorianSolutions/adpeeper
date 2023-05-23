@@ -1,9 +1,10 @@
 # ADPeeper
 
-ADPeeper is a Python 3 / FastAPI app that exports ADP HR worker data to standard formats for consumption
-in third-party systems.
+ADPeeper is a Python 3 / FastAPI app that exports ADP HR worker data to CSV and/or JSON for consumption
+in third-party systems. Additionally, ADPeeper can be configured to directly synchronize worker data to
+Active Directory users.
 
-## TL;DR
+## TL;DR - Linux
 
 To get started quickly with a simple deployment, execute the following `bash` commands on a *nix based system
 with `git`, `python3`, `python3-pip`, and `python3-venv` installed:
@@ -15,6 +16,10 @@ cd adpeeper
 source venv/bin/activate
 adp run
 ```
+
+## TL;DR - Windows
+
+Coming soon!
 
 ## Project Documentation
 

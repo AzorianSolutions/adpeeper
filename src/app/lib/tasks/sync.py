@@ -1,6 +1,7 @@
 from loguru import logger
 from app.config import settings
 from app.lib.ad.base import AdStatic
+from app.lib.ad.exceptions import ADSyncError
 from app.lib.ad.users import UsersAPI
 from app.lib.adp.api.exceptions import APIConnectionError, APIDisconnectionError, APIRequestError
 from app.lib.adp.api.static import ApiConnectionStatic
@@ -37,18 +38,17 @@ class SyncTasks:
                 logger.error(f'Error requesting workers from ADP API: {e}')
 
         if isinstance(workers, list) and connected and response.status == AdStatic.STATUS_SUCCESS:
+            users_api = UsersAPI()
+            users: list[UserRecord] = users_api.build_users()
+
+            print(users)
+
             try:
-                users_api = UsersAPI()
-                users: list[UserRecord] = users_api.build_users()
-
-                print(users)
-
-                sync_result = users_api.sync_from_workers(workers)
-
-            except IOError as e:
-                response.error = str(e)
+                users_api.sync_from_workers(workers)
+            except ADSyncError as e:
                 response.status = AdStatic.STATUS_ERROR
-                logger.error(f'Error synchronizing Active Directory users: {e}')
+                response.error = str(e)
+                logger.error(f'Error synchronizing Active Directory users from ADP workers: {e}')
 
         if connected:
             try:

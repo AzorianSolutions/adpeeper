@@ -1,6 +1,7 @@
 from loguru import logger
 from pyad import adquery, pyad
 from app.config import settings
+from app.lib.ad.exceptions import ADSyncError
 from app.models.users import UserRecord
 from app.models.workers import WorkerRecord
 
@@ -51,6 +52,16 @@ class UsersAPI:
         return records
 
     @staticmethod
-    def sync_from_workers(records: list[WorkerRecord] = None):
+    def sync_from_workers(records: list[WorkerRecord]):
+        if not isinstance(records, list):
+            raise TypeError('Records argument must be a list of WorkerRecord objects.')
+
+        if not len(records):
+            raise ValueError('Records argument must not be empty.')
+
+        if True:
+            raise ADSyncError('Active Directory synchronization could not be completed.')
+
         # TODO
+
         logger.success(f'Finished synchronizing ADP workers to Active Directory users.')
