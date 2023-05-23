@@ -11,7 +11,7 @@ class UsersAPI:
     @staticmethod
     def get_users(params: dict = None) -> list:
         defaults: dict = {
-            'attributes': ['employeeID', 'distinguishedName', 'samAccountName', 'displayName'],
+            'attributes': ['employeeID', 'canonicalName', 'distinguishedName', 'samAccountName', 'displayName'],
             'base_dn': 'OU=Managed Users,OU=Managed Resources,DC=root,DC=local',
             'search_scope': 'subtree',
         }
@@ -34,7 +34,7 @@ class UsersAPI:
     def build_users() -> list[UserRecord]:
         records: list[UserRecord] = []
         params: dict = {
-            'attributes': ['employeeID', 'distinguishedName', 'samAccountName', 'displayName'],
+            'attributes': ['employeeID', 'canonicalName', 'distinguishedName', 'samAccountName', 'displayName'],
         }
         users: list = UsersAPI.get_users(params=params)
 
@@ -43,7 +43,8 @@ class UsersAPI:
 
             record: UserRecord = UserRecord()
             record.employee_id = user['employeeID']
-            record.distinguished_name = user['distinguishedName']
+            record.cn = user['canonicalName']
+            record.dn = user['distinguishedName']
             record.sam_account_name = user['samAccountName']
             record.display_name = user['displayName']
 
@@ -75,15 +76,26 @@ class UsersAPI:
         return user_map
 
     @staticmethod
-    def sync_from_workers(records: list[WorkerRecord]):
-        if not isinstance(records, list):
-            raise TypeError('Records argument must be a list of WorkerRecord objects.')
+    def sync_from_workers(users: list[UserRecord], workers: list[WorkerRecord]):
 
-        if not len(records):
-            raise ValueError('Records argument must not be empty.')
+        if not isinstance(users, list):
+            raise TypeError('users argument must be a list of UserRecord objects.')
 
-        if True:
-            raise ADSyncError('Active Directory synchronization could not be completed.')
+        if not len(users):
+            raise ValueError('users argument must not be empty.')
+
+        if not isinstance(workers, list):
+            raise TypeError('workers argument must be a list of WorkerRecord objects.')
+
+        if not len(workers):
+            raise ValueError('workers argument must not be empty.')
+
+        # if True:
+        #     raise ADSyncError('Active Directory synchronization could not be completed.')
+
+        user_map: dict[str, UserRecord] = UsersAPI.map_users('employee_id', users)
+
+        print(user_map)
 
         # TODO
 
