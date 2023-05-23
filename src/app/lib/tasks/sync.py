@@ -47,6 +47,8 @@ class SyncTasks:
                 response.status = AdStatic.STATUS_ERROR
                 response.error = str(e)
                 logger.error(f'Error synchronizing Active Directory users from ADP workers: {e}')
+        else:
+            logger.error('No ADP worker records were retrieved so there is nothing to sync.')
 
         if connected:
             try:
