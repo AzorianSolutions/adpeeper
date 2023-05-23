@@ -49,7 +49,7 @@ class SyncTasks:
                 response.error = str(e)
                 logger.error(f'Error synchronizing Active Directory users from ADP workers: {e}')
         else:
-            logger.info('No ADP worker records were retrieved so there is nothing to sync.')
+            logger.error('No ADP worker records were retrieved so there is nothing to sync.')
 
         if connected:
             try:

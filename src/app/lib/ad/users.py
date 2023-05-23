@@ -39,7 +39,7 @@ class UsersAPI:
         users: list = UsersAPI.get_users(params=params)
 
         for user in users:
-            logger.trace(user)
+            logger.debug(user)
 
             record: UserRecord = UserRecord()
             record.employee_id = user['employeeID']
@@ -50,7 +50,7 @@ class UsersAPI:
 
             records.append(record)
 
-            logger.trace(f'Retrieved user record: {record.dict()}')
+            logger.debug(f'Retrieved user record: {record.dict()}')
 
         return records
 
