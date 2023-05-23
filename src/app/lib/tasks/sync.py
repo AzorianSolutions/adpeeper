@@ -21,6 +21,7 @@ class SyncTasks:
         response: UsersSyncResponse = UsersSyncResponse()
         response.status = AdStatic.STATUS_SUCCESS
         workers: list[WorkerRecord] | None = None
+        users: list[UserRecord] | None = None
 
         try:
             connected = workers_api.connect().status == ApiConnectionStatic.STATUS_CONNECTED
@@ -37,11 +38,8 @@ class SyncTasks:
                 response.status = AdStatic.STATUS_ERROR
                 logger.error(f'Error requesting workers from ADP API: {e}')
 
-        print(workers)
-
         if isinstance(workers, list) and connected and response.status == AdStatic.STATUS_SUCCESS:
-            users: list[UserRecord] = UsersAPI.build_users()
-            response.payload = users
+            users = UsersAPI.build_users()
             try:
                 UsersAPI.sync_from_workers(users, workers)
             except ADSyncError as e:
@@ -58,5 +56,7 @@ class SyncTasks:
                 response.error = str(e)
                 response.status = AdStatic.STATUS_ERROR
                 logger.error(f'Error disconnecting from ADP API: {e}')
+
+        response.payload = users
 
         return response
