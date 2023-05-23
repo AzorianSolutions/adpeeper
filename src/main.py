@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi_utils.tasks import repeat_every
 from loguru import logger
 from app.config import settings
-from app.lib.tasks.export import ExportTasks
+from app.lib.tasks.sync import SyncTasks
 from app.middleware import cors
 from app.routers import api, core
 
@@ -36,9 +36,9 @@ app.include_router(api.router)
 # Automatic Export Scheduling
 @app.on_event('startup')
 @repeat_every(seconds=settings.export_interval if isinstance(settings.export_interval, int) else 0)
-def export_workers_task() -> None:
+def sync_users_task() -> None:
     """
     Export timer event handler
     :return: None
     """
-    ExportTasks.export_workers()
+    SyncTasks.sync_users_to_workers()

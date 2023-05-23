@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from loguru import logger
 from app.lib.tasks.export import ExportTasks
-from app.models.export import WorkersExportResponse, WorkerRecord
+from app.models.workers import WorkersExportResponse, WorkerRecord
 
 router = APIRouter(
     prefix="/export",

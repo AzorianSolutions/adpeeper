@@ -9,7 +9,7 @@ class WorkerRecord(BaseModel):
     termination_date: str = ''
     status_effective_date: str = ''
     job_title: str = ''
-    supervisor_name: str = ''
+    supervisor_id: str = ''
     city_name: str = ''
     state_code: str = ''
     phone_number: str = ''
@@ -26,7 +26,7 @@ class WorkerRecord(BaseModel):
             self.termination_date,
             self.status_effective_date,
             self.job_title,
-            self.supervisor_name,
+            self.supervisor_id,
             self.location,
             self.phone_number,
         )

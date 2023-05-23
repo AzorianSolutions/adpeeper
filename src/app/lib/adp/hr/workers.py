@@ -3,7 +3,7 @@ from pathlib import Path
 from app.config import settings
 from app.lib.adp.api.base import BaseAPI
 from app.lib.adp.api.exceptions import APIRequestDone
-from app.models.export import WorkerRecord
+from app.models.workers import WorkerRecord
 
 
 class HRWorkersAPI(BaseAPI):
@@ -80,9 +80,9 @@ class HRWorkersAPI(BaseAPI):
             if 'jobTitle' in assignment:
                 record.job_title = assignment['jobTitle']
 
-            if 'reportsTo' in assignment and 'reportsToWorkerName' in assignment['reportsTo'][0] \
-                    and 'formattedName' in assignment['reportsTo'][0]['reportsToWorkerName']:
-                record.supervisor_name = assignment['reportsTo'][0]['reportsToWorkerName']['formattedName']
+            if 'reportsTo' in assignment and 'workerID' in assignment['reportsTo'][0] \
+                    and 'idValue' in assignment['reportsTo'][0]['workerID']:
+                record.supervisor_id = assignment['reportsTo'][0]['workerID']['idValue']
 
             if 'homeWorkLocation' in assignment and 'address' in assignment['homeWorkLocation'] \
                     and 'cityName' in assignment['homeWorkLocation']['address']:

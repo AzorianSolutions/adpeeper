@@ -19,6 +19,9 @@ DEFAULT_SECRETS_PATH: Path | None = None
 class AppSettings(BaseSettings):
     """ The application settings class that loads setting values from the application environment. """
 
+    ad_password: str = ''
+    ad_server: str = ''
+    ad_username: str = ''
     adp_accounts_api_url: str = 'https://accounts.adp.com'
     adp_api_request_url: str = 'https://api.adp.com'
     adp_disconnect_url: str = 'https://accounts.adp.com/auth/oauth/v2/logout'
