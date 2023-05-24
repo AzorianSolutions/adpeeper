@@ -17,11 +17,11 @@ class UsersAPI:
         }
         params = {**defaults} if params is None else {**defaults, **params}
 
-        logger.warning('Connecting to Active Directory...')
+        logger.debug('Connecting to Active Directory...')
 
         q = adquery.ADQuery()
 
-        logger.warning('Querying Active Directory....')
+        logger.debug('Querying Active Directory....')
 
         q.execute_query(
             attributes=params['attributes'],
@@ -29,7 +29,7 @@ class UsersAPI:
             search_scope=params['search_scope']
         )
 
-        logger.warning('Retrieving query results...')
+        logger.debug('Retrieving query results...')
 
         users = q.get_results()
 
