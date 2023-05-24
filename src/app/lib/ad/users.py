@@ -16,13 +16,20 @@ class UsersAPI:
             'search_scope': 'subtree',
         }
         params = {**defaults} if params is None else {**defaults, **params}
+
+        logger.warning('Connecting to Active Directory...')
+
         q = adquery.ADQuery()
+
+        logger.warning('Querying Active Directory....')
 
         q.execute_query(
             attributes=params['attributes'],
             base_dn=params['base_dn'],
             search_scope=params['search_scope']
         )
+
+        logger.warning('Retrieving query results...')
 
         users = q.get_results()
 

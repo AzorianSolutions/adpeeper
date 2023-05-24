@@ -32,42 +32,29 @@ class SyncTasks:
 
         if connected:
             try:
+                logger.debug('Building ADP workers...')
                 workers = workers_api.build_workers()
-                logger.error('ADP workers have been built!')
-                logger.warning('ADP workers have been built!')
-                logger.info('ADP workers have been built!')
+                logger.debug('ADP workers have been built.')
             except APIRequestError as e:
                 response.error = str(e)
                 response.status = AdStatic.STATUS_ERROR
                 logger.error(f'Error requesting workers from ADP API: {e}')
 
         if isinstance(workers, list) and connected and response.status == AdStatic.STATUS_SUCCESS:
-            logger.info('Building AD users...')
-            logger.warning('Building AD users...')
-
+            logger.debug('Building AD users...')
             users = UsersAPI.build_users()
-
-            logger.info('AD users have been built!')
-            logger.warning('AD users have been built!')
+            logger.debug('AD users have been built.')
 
             try:
-                logger.info('Syncing AD users to ADP workers...')
-                logger.warning('Syncing AD users to ADP workers...')
-
+                logger.debug('Syncing AD users to ADP workers...')
                 UsersAPI.sync_from_workers(users, workers)
-
-                logger.info('Synchronized AD users to ADP workers...')
-                logger.warning('Synchronized AD users to ADP workers...')
+                logger.debug('Synchronized AD users to ADP workers.')
             except ADSyncError as e:
                 response.status = AdStatic.STATUS_ERROR
                 response.error = str(e)
-                logger.info(f'Error synchronizing Active Directory users from ADP workers: {e}')
-                logger.warning(f'Error synchronizing Active Directory users from ADP workers: {e}')
                 logger.error(f'Error synchronizing Active Directory users from ADP workers: {e}')
         else:
-            logger.info('No ADP worker records were retrieved so there is nothing to sync.')
             logger.warning('No ADP worker records were retrieved so there is nothing to sync.')
-            logger.error('No ADP worker records were retrieved so there is nothing to sync.')
 
         if connected:
             try:
