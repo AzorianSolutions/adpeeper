@@ -39,7 +39,8 @@ class HRWorkersAPI(BaseAPI):
         workers: list = self.get_workers(params={'$top': 1000, '$skip': 0})
 
         for worker in workers:
-            logger.debug(worker)
+            import json
+            print(json.dumps(worker.dict(), indent=4))
 
             if 'workerStatus' in worker and 'statusCode' in worker['workerStatus'] \
                     and 'codeValue' in worker['workerStatus']['statusCode'] \
@@ -96,9 +97,6 @@ class HRWorkersAPI(BaseAPI):
             records.append(record)
 
             logger.debug(f'Retrieved worker record: {record.dict()}')
-
-            import json
-            print(json.dumps(record.dict(), indent=4))
 
         return records
 
