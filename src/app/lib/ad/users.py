@@ -107,7 +107,6 @@ class UsersAPI:
             user: UserRecord | None
 
             if worker.id in user_map:
-                logger.debug(f'Found user record for worker {worker.id} ({worker.legal_name}).')
                 user = user_map[worker.id]
             else:
                 user = UsersAPI.find_user_by_name(users, worker.legal_name)
