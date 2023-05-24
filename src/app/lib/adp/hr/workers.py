@@ -97,6 +97,9 @@ class HRWorkersAPI(BaseAPI):
 
             logger.debug(f'Retrieved worker record: {record.dict()}')
 
+            import json
+            print(json.dumps(record.dict(), indent=4))
+
         return records
 
     @staticmethod

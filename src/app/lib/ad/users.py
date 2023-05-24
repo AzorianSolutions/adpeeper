@@ -83,7 +83,7 @@ class UsersAPI:
         return user_map
 
     @staticmethod
-    def sync_from_workers(users: list[UserRecord], workers: list[WorkerRecord]):
+    def sync_from_workers(users: list[UserRecord], workers: list[WorkerRecord], dry_run: bool = False):
 
         if not isinstance(users, list):
             raise TypeError('users argument must be a list of UserRecord objects.')
@@ -97,13 +97,58 @@ class UsersAPI:
         if not len(workers):
             raise ValueError('workers argument must not be empty.')
 
-        # if True:
-        #     raise ADSyncError('Active Directory synchronization could not be completed.')
-
         user_map: dict[str, UserRecord] = UsersAPI.map_users('employee_id', users)
+        missing_users: list[WorkerRecord] = []
 
-        print(user_map)
+        for worker in workers:
+            logger.debug(f'Syncing worker {worker.legal_name} to Active Directory...')
+            logger.debug(worker)
 
-        # TODO
+            user: UserRecord | None
 
-        logger.success(f'Finished synchronizing ADP workers to Active Directory users.')
+            if worker.id in user_map:
+                logger.debug(f'Found user record for worker {worker.id} ({worker.legal_name}).')
+                user = user_map[worker.id]
+            else:
+                user = UsersAPI.find_user_by_name(users, worker.legal_name)
+
+            if user is None:
+                missing_users.append(worker)
+                logger.error(f'Could not find user record for worker {worker.id} ({worker.legal_name}).')
+                continue
+
+            logger.debug(f'Found user record for worker {worker.id} ({worker.legal_name}).')
+
+            dirty: bool = False
+            attributes: dict = {}
+
+            if user.employee_id != worker.id:
+                attributes['employeeID'] = worker.id
+                dirty = True
+
+            if user.display_name != worker.legal_name:
+                attributes['displayName'] = worker.legal_name
+                dirty = True
+
+            if user.title != worker.job_title:
+                attributes['title'] = worker.job_title
+                dirty = True
+
+            if user.description != worker.job_title:
+                attributes['description'] = worker.job_title
+                dirty = True
+
+            # TODO: Compare user meta fields for differences and update if necessary.
+
+            if not dry_run and dirty:
+                pyad.from_dn(user.dn).update_attributes(attributes)
+
+        if not dry_run:
+            logger.success(f'Finished synchronizing ADP workers to Active Directory users.')
+
+    @staticmethod
+    def find_user_by_name(users: list[UserRecord], name: str) -> UserRecord | None:
+        for user in users:
+            if user.display_name == name:
+                return user
+        return None

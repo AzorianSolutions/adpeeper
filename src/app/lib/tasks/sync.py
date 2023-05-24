@@ -14,7 +14,7 @@ from app.models.users import UsersSyncResponse, UserRecord
 class SyncTasks:
 
     @staticmethod
-    def sync_users_to_workers() -> UsersSyncResponse:
+    def sync_users_to_workers(dry_run: bool = False) -> UsersSyncResponse:
         api_config: ApiConfig = ApiConfig.create_from_settings(settings)
         workers_api: HRWorkersAPI = HRWorkersAPI(api_config, auto_connect=False)
         connected: bool = False
@@ -47,7 +47,7 @@ class SyncTasks:
 
             try:
                 logger.debug('Syncing AD users to ADP workers...')
-                UsersAPI.sync_from_workers(users, workers)
+                UsersAPI.sync_from_workers(users, workers, dry_run)
                 logger.debug('Synchronized AD users to ADP workers.')
             except ADSyncError as e:
                 response.status = AdStatic.STATUS_ERROR
