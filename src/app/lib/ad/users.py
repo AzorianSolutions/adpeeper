@@ -123,22 +123,29 @@ class UsersAPI:
             attributes: dict = {}
 
             if user.employee_id != worker.id:
+                logger.debug(f'Updating employeeID for worker {worker.id} ({worker.legal_name}).')
                 attributes['employeeID'] = worker.id
                 dirty = True
 
+            if user.identity != user.sam_account_name:
+                logger.debug(f'Updating identity for worker {worker.id} ({worker.legal_name}).')
+                attributes['identity'] = user.sam_account_name
+                dirty = True
+
             if user.display_name != worker.legal_name:
+                logger.debug(f'Updating displayName for worker {worker.id} ({worker.legal_name}).')
                 attributes['displayName'] = worker.legal_name
                 dirty = True
 
             if user.title != worker.job_title:
+                logger.debug(f'Updating title for worker {worker.id} ({worker.legal_name}).')
                 attributes['title'] = worker.job_title
                 dirty = True
 
             if user.description != worker.job_title:
+                logger.debug(f'Updating description for worker {worker.id} ({worker.legal_name}).')
                 attributes['description'] = worker.job_title
                 dirty = True
-
-            # TODO: Compare user meta fields for differences and update if necessary.
 
             if not dry_run and dirty:
                 pyad.from_dn(user.dn).update_attributes(attributes)
