@@ -31,7 +31,7 @@ class UsersAPI:
 
         logger.debug('Retrieving query results...')
 
-        users = q.get_results()
+        users = list(q.get_results())
 
         logger.info(f'Total AD Users Retrieved: {len(users)}')
 
