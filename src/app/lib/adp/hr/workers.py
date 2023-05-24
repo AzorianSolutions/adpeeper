@@ -40,7 +40,7 @@ class HRWorkersAPI(BaseAPI):
 
         for worker in workers:
             import json
-            print(json.dumps(worker.dict(), indent=4))
+            print(json.dumps(worker, indent=4))
 
             if 'workerStatus' in worker and 'statusCode' in worker['workerStatus'] \
                     and 'codeValue' in worker['workerStatus']['statusCode'] \
