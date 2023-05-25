@@ -163,8 +163,8 @@ class UsersAPI:
 
         # Create a CSV report of actions taken
         if len(actions_report):
-            if not os.access(settings.report_path_actions, os.W_OK):
-                raise ADSyncError(f'Cannot write to actions report file at {settings.report_path_actions}.')
+            # if not os.access(settings.report_path_actions, os.W_OK):
+            #     raise ADSyncError(f'Cannot write to actions report file at {settings.report_path_actions}.')
 
             rows: list[list] = [['workerID', 'legalName', 'attribute', 'oldValue', 'newValue']]
 
@@ -180,8 +180,8 @@ class UsersAPI:
 
         # Create a CSV report of unlinked workers if there are any
         if len(unlinked_report):
-            if not os.access(settings.report_path_unlinked, os.W_OK):
-                raise ADSyncError(f'Cannot write to unlinked report file at {settings.report_path_unlinked}.')
+            # if not os.access(settings.report_path_unlinked, os.W_OK):
+            #     raise ADSyncError(f'Cannot write to unlinked report file at {settings.report_path_unlinked}.')
 
             rows: list[list] = [['workerID', 'legalName', 'formattedName', 'jobTitle', 'department', 'location',
                                  'managerID']]
