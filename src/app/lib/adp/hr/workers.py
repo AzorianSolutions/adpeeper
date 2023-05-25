@@ -93,7 +93,10 @@ class HRWorkersAPI(BaseAPI):
                     # Extract worker's business unit / division from the assignment
                     if 'typeCode' in unit and 'codeValue' in unit['typeCode'] \
                             and unit['typeCode']['codeValue'] == 'Business Unit':
-                        record.division = unit['nameCode']['shortName']
+                        if 'shortName' in unit['nameCode']:
+                            record.division = unit['nameCode']['shortName']
+                        if 'longName' in unit['nameCode']:
+                            record.division = unit['nameCode']['longName']
 
                     # Extract worker's department from the assignment
                     if 'typeCode' in unit and 'codeValue' in unit['typeCode'] \
