@@ -153,8 +153,8 @@ class UsersAPI:
 
             if user.office_phone != worker.phone_number:
                 logger.debug(f'Updating officePhone for worker {worker.id} ({worker.full_name}).')
-                attributes['officePhone'] = worker.phone_number
-                actions_report.append((worker.id, worker.full_name, 'officePhone', 'UPDATE', user.office_phone,
+                # attributes['officePhone'] = worker.phone_number
+                actions_report.append((worker.id, worker.full_name, 'officePhone', 'ALERT', user.office_phone,
                                        worker.phone_number))
                 dirty = True
 
