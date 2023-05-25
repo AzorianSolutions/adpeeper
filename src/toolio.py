@@ -10,7 +10,7 @@ Setup logging
 """
 logger_params: dict = {
     'colorize': True,
-    'format': '<green>{time}</green> <level>{message}</level>',
+    'format': '<green>{time}</green> <level>{level} {message}</level>',
     'level': 'TRACE' if settings.debug else 'INFO',
 }
 logger.remove()
