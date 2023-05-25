@@ -84,9 +84,8 @@ class UsersAPI:
         return user_map
 
     @staticmethod
-    def sync_from_workers(users: list[UserRecord], workers: list[WorkerRecord], dry_run: bool = False):
-        import csv
-
+    def sync_from_workers(users: list[UserRecord], workers: list[WorkerRecord], dry_run: bool = False) \
+            -> tuple[list[tuple], list[WorkerRecord]]:
         if not isinstance(users, list):
             raise TypeError('users argument must be a list of UserRecord objects.')
 
@@ -127,13 +126,15 @@ class UsersAPI:
             if user.employee_id != worker.id:
                 logger.debug(f'Updating employeeID for worker {worker.id} ({worker.full_name}).')
                 attributes['employeeID'] = worker.id
-                actions_report.append((worker.id, worker.full_name, 'employeeID', 'UPDATE', user.employee_id, worker.id))
+                actions_report.append(
+                    (worker.id, worker.full_name, 'employeeID', 'UPDATE', user.employee_id, worker.id))
                 dirty = True
 
             if user.identity != user.sam_account_name:
                 logger.debug(f'Updating identity for worker {worker.id} ({worker.full_name}).')
                 attributes['identity'] = user.sam_account_name
-                actions_report.append((worker.id, worker.full_name, 'identity', 'UPDATE', user.identity, user.sam_account_name))
+                actions_report.append(
+                    (worker.id, worker.full_name, 'identity', 'UPDATE', user.identity, user.sam_account_name))
                 dirty = True
 
             if user.display_name != worker.full_name:
@@ -166,19 +167,22 @@ class UsersAPI:
             if user.description != worker.job_title:
                 logger.debug(f'Updating description for worker {worker.id} ({worker.full_name}).')
                 attributes['description'] = worker.job_title
-                actions_report.append((worker.id, worker.full_name, 'description', 'UPDATE', user.description, worker.job_title))
+                actions_report.append(
+                    (worker.id, worker.full_name, 'description', 'UPDATE', user.description, worker.job_title))
                 dirty = True
 
             if user.division != worker.division:
                 logger.debug(f'Updating division for worker {worker.id} ({worker.full_name}).')
                 attributes['division'] = worker.division
-                actions_report.append((worker.id, worker.full_name, 'division', 'UPDATE', user.division, worker.division))
+                actions_report.append(
+                    (worker.id, worker.full_name, 'division', 'UPDATE', user.division, worker.division))
                 dirty = True
 
             if user.department != worker.department:
                 logger.debug(f'Updating department for worker {worker.id} ({worker.full_name}).')
                 attributes['department'] = worker.department
-                actions_report.append((worker.id, worker.full_name, 'department', 'UPDATE', user.department, worker.department))
+                actions_report.append(
+                    (worker.id, worker.full_name, 'department', 'UPDATE', user.department, worker.department))
                 dirty = True
 
             if user.office != worker.location:
@@ -193,14 +197,18 @@ class UsersAPI:
                 if user.manager != supervisor.dn:
                     logger.debug(f'Updating manager for worker {worker.id} ({worker.full_name}).')
                     attributes['manager'] = supervisor.dn
-                    actions_report.append((worker.id, worker.full_name, 'manager', 'UPDATE', user.manager, supervisor.dn))
+                    actions_report.append(
+                        (worker.id, worker.full_name, 'manager', 'UPDATE', user.manager, supervisor.dn))
                     dirty = True
 
             if not dry_run and dirty:
                 pyad.from_dn(user.dn).update_attributes(attributes)
 
-        logger.success(f'Finished ' + (' dry-run of' if dry_run else '')
-                       + 'synchronizing ADP workers to Active Directory users.')
+        return actions_report, unlinked_report
+
+    @staticmethod
+    def save_reports(actions_report: list[tuple], unlinked_report: list[WorkerRecord]):
+        import csv
 
         # Create a CSV report of actions taken
         if len(actions_report):

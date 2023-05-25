@@ -16,8 +16,6 @@ logger_params: dict = {
 logger.remove()
 logger.add(sys.stderr, **logger_params)
 
-logger.warning(f'Debug Mode: {settings.debug}')
-
 """
 Setup Active Directory authentication if any overrides provided
 """

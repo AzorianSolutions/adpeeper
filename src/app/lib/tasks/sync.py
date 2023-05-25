@@ -23,7 +23,10 @@ class SyncTasks:
         workers: list[WorkerRecord] | None = None
         users: list[UserRecord] | None = None
 
+        logger.info('Synchronizing Active Directory users from ADP workers...')
+
         try:
+            logger.debug('Connecting to ADP API...')
             connected = workers_api.connect().status == ApiConnectionStatic.STATUS_CONNECTED
         except APIConnectionError as e:
             response.error = str(e)
@@ -32,29 +35,33 @@ class SyncTasks:
 
         if connected:
             try:
-                logger.debug('Building ADP workers...')
+                logger.info('Loading ADP workers...')
                 workers = workers_api.build_workers()
-                logger.debug('ADP workers have been built.')
+                logger.debug('ADP workers have been loaded.')
             except APIRequestError as e:
                 response.error = str(e)
                 response.status = AdStatic.STATUS_ERROR
                 logger.error(f'Error requesting workers from ADP API: {e}')
 
-        if isinstance(workers, list) and connected and response.status == AdStatic.STATUS_SUCCESS:
-            logger.debug('Building AD users...')
+        if not isinstance(workers, list) or not len(workers) or not connected \
+                or response.status != AdStatic.STATUS_SUCCESS:
+            logger.warning('No ADP worker records were retrieved so there is nothing to sync.')
+        else:
+            logger.info('Loading AD users...')
             users = UsersAPI.build_users()
-            logger.debug('AD users have been built.')
+            logger.debug('AD users have been loaded.')
 
             try:
-                logger.debug('Syncing AD users to ADP workers...')
-                UsersAPI.sync_from_workers(users, workers, dry_run)
-                logger.debug('Synchronized AD users to ADP workers.')
+                logger.info('Syncing AD users to ADP workers...')
+                reports = UsersAPI.sync_from_workers(users, workers, dry_run)
+                logger.debug('AD users have been synchronized from ADP workers.')
+
+                logger.info('Saving post-synchronization reports...')
+                UsersAPI.save_reports(reports)
             except ADSyncError as e:
                 response.status = AdStatic.STATUS_ERROR
                 response.error = str(e)
                 logger.error(f'Error synchronizing Active Directory users from ADP workers: {e}')
-        else:
-            logger.warning('No ADP worker records were retrieved so there is nothing to sync.')
 
         if connected:
             try:
@@ -65,5 +72,8 @@ class SyncTasks:
                 logger.error(f'Error disconnecting from ADP API: {e}')
 
         response.payload = users
+
+        if response.status == AdStatic.STATUS_SUCCESS:
+            logger.success('Successfully synchronized Active Directory users from ADP workers.')
 
         return response
