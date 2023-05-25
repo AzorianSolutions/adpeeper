@@ -104,7 +104,7 @@ class UsersAPI:
         unlinked_report: list[WorkerRecord] = []
 
         for worker in workers:
-            logger.debug(f'Syncing worker {worker.legal_name} to Active Directory...')
+            logger.debug(f'Syncing worker {worker.full_name} to Active Directory...')
             logger.debug(worker)
 
             user: UserRecord | None
@@ -112,48 +112,89 @@ class UsersAPI:
             if worker.id in user_map:
                 user = user_map[worker.id]
             else:
-                user = UsersAPI.find_user_by_name(users, worker.legal_name)
+                user = UsersAPI.find_user_by_name(users, worker.full_name)
 
             if user is None:
                 unlinked_report.append(worker)
-                logger.error(f'Could not find user record for worker {worker.id} ({worker.legal_name}).')
+                logger.error(f'Could not find user record for worker {worker.id} ({worker.full_name}).')
                 continue
 
-            logger.debug(f'Found user record for worker {worker.id} ({worker.legal_name}).')
+            logger.debug(f'Found user record for worker {worker.id} ({worker.full_name}).')
 
             dirty: bool = False
             attributes: dict = {}
 
             if user.employee_id != worker.id:
-                logger.debug(f'Updating employeeID for worker {worker.id} ({worker.legal_name}).')
+                logger.debug(f'Updating employeeID for worker {worker.id} ({worker.full_name}).')
                 attributes['employeeID'] = worker.id
-                actions_report.append((worker.id, worker.legal_name, 'employeeID', user.employee_id, worker.id))
+                actions_report.append((worker.id, worker.full_name, 'employeeID', user.employee_id, worker.id))
                 dirty = True
 
             if user.identity != user.sam_account_name:
-                logger.debug(f'Updating identity for worker {worker.id} ({worker.legal_name}).')
+                logger.debug(f'Updating identity for worker {worker.id} ({worker.full_name}).')
                 attributes['identity'] = user.sam_account_name
-                actions_report.append((worker.id, worker.legal_name, 'identity', user.identity, user.sam_account_name))
+                actions_report.append((worker.id, worker.full_name, 'identity', user.identity, user.sam_account_name))
                 dirty = True
 
-            if user.display_name != worker.legal_name:
-                logger.debug(f'Updating displayName for worker {worker.id} ({worker.legal_name}).')
-                attributes['displayName'] = worker.legal_name
-                actions_report.append((worker.id, worker.legal_name, 'displayName', user.display_name,
-                                       worker.legal_name))
+            if user.display_name != worker.full_name:
+                logger.debug(f'Updating displayName for worker {worker.id} ({worker.full_name}).')
+                attributes['displayName'] = worker.full_name
+                actions_report.append((worker.id, worker.full_name, 'displayName', user.display_name,
+                                       worker.full_name))
+                dirty = True
+
+            if user.mobile != worker.phone_number:
+                logger.debug(f'Updating mobile for worker {worker.id} ({worker.full_name}).')
+                attributes['mobile'] = worker.phone_number
+                actions_report.append((worker.id, worker.full_name, 'mobile', user.mobile,
+                                       worker.phone_number))
+                dirty = True
+
+            if user.office_phone != worker.phone_number:
+                logger.debug(f'Updating officePhone for worker {worker.id} ({worker.full_name}).')
+                attributes['officePhone'] = worker.phone_number
+                actions_report.append((worker.id, worker.full_name, 'officePhone', user.office_phone,
+                                       worker.phone_number))
                 dirty = True
 
             if user.title != worker.job_title:
-                logger.debug(f'Updating title for worker {worker.id} ({worker.legal_name}).')
+                logger.debug(f'Updating title for worker {worker.id} ({worker.full_name}).')
                 attributes['title'] = worker.job_title
-                actions_report.append((worker.id, worker.legal_name, 'title', user.title, worker.job_title))
+                actions_report.append((worker.id, worker.full_name, 'title', user.title, worker.job_title))
                 dirty = True
 
             if user.description != worker.job_title:
-                logger.debug(f'Updating description for worker {worker.id} ({worker.legal_name}).')
+                logger.debug(f'Updating description for worker {worker.id} ({worker.full_name}).')
                 attributes['description'] = worker.job_title
-                actions_report.append((worker.id, worker.legal_name, 'description', user.description, worker.job_title))
+                actions_report.append((worker.id, worker.full_name, 'description', user.description, worker.job_title))
                 dirty = True
+
+            if user.division != worker.division:
+                logger.debug(f'Updating division for worker {worker.id} ({worker.full_name}).')
+                attributes['division'] = worker.division
+                actions_report.append((worker.id, worker.full_name, 'division', user.division, worker.division))
+                dirty = True
+
+            if user.department != worker.department:
+                logger.debug(f'Updating department for worker {worker.id} ({worker.full_name}).')
+                attributes['department'] = worker.department
+                actions_report.append((worker.id, worker.full_name, 'department', user.department, worker.department))
+                dirty = True
+
+            if user.office != worker.location:
+                logger.debug(f'Updating office for worker {worker.id} ({worker.full_name}).')
+                attributes['office'] = worker.location
+                actions_report.append((worker.id, worker.full_name, 'office', user.office, worker.location))
+                dirty = True
+
+            if isinstance(worker.supervisor_id, str) and len(worker.supervisor_id) \
+                    and worker.supervisor_id in user_map:
+                supervisor: UserRecord = user_map[worker.supervisor_id]
+                if user.manager != supervisor.dn:
+                    logger.debug(f'Updating manager for worker {worker.id} ({worker.full_name}).')
+                    attributes['manager'] = supervisor.dn
+                    actions_report.append((worker.id, worker.full_name, 'office', user.manager, supervisor.dn))
+                    dirty = True
 
             if not dry_run and dirty:
                 pyad.from_dn(user.dn).update_attributes(attributes)
@@ -181,7 +222,7 @@ class UsersAPI:
                                  'managerID']]
 
             for worker in unlinked_report:
-                rows.append([worker.id, worker.legal_name, worker.display_name, worker.job_title, worker.department,
+                rows.append([worker.id, worker.full_name, worker.display_name, worker.job_title, worker.department,
                              worker.location, worker.supervisor_id])
 
             with open(settings.report_path_unlinked, 'w') as f:

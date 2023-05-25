@@ -53,9 +53,17 @@ class HRWorkersAPI(BaseAPI):
             if 'workerID' in worker and 'idValue' in worker['workerID']:
                 record.id = worker['workerID']['idValue']
 
-            if 'person' in worker and 'legalName' in worker['person'] \
-                    and 'formattedName' in worker['person']['legalName']:
-                record.legal_name = worker['person']['legalName']['formattedName']
+            if 'person' in worker and 'legalName' in worker['person']:
+                if 'givenName' in worker['person']['legalName']:
+                    record.given_name = worker['person']['legalName']['givenName']
+                if 'middleName' in worker['person']['legalName']:
+                    record.middle_name = worker['person']['legalName']['middleName']
+                if 'familyName1' in worker['person']['legalName']:
+                    record.family_name = worker['person']['legalName']['familyName1']
+
+            if 'businessCommunication' in worker and 'mobiles' in worker['businessCommunication'] \
+                    and len(worker['businessCommunication']['mobiles']):
+                record.phone_number = worker['businessCommunication']['mobiles'][0]['formattedNumber']
 
             if 'workerDates' in worker:
                 if 'originalHireDate' in worker['workerDates']:
@@ -73,21 +81,25 @@ class HRWorkersAPI(BaseAPI):
                 if 'effectiveDate' in assignment['assignmentStatus']:
                     record.status_effective_date = assignment['assignmentStatus']['effectiveDate']
 
-            if 'jobTitle' in assignment:
-                record.job_title = assignment['jobTitle']
-
             if 'reportsTo' in assignment and 'workerID' in assignment['reportsTo'][0] \
                     and 'idValue' in assignment['reportsTo'][0]['workerID']:
                 record.supervisor_id = assignment['reportsTo'][0]['workerID']['idValue']
 
-            if 'homeWorkLocation' in assignment and 'address' in assignment['homeWorkLocation'] \
-                    and 'cityName' in assignment['homeWorkLocation']['address']:
-                record.city_name = assignment['homeWorkLocation']['address']['cityName']
+            if 'jobTitle' in assignment:
+                record.job_title = assignment['jobTitle']
 
-            if 'homeWorkLocation' in assignment and 'address' in assignment['homeWorkLocation'] \
-                    and 'countrySubdivisionLevel1' in assignment['homeWorkLocation']['address'] \
-                    and 'codeValue' in assignment['homeWorkLocation']['address']['countrySubdivisionLevel1']:
-                record.state_code = assignment['homeWorkLocation']['address']['countrySubdivisionLevel1']['codeValue']
+            if 'homeOrganizationalUnits' in assignment:
+                total_units: int = len(assignment['homeOrganizationalUnits'])
+
+                if total_units > 0:
+                    record.division = assignment['homeOrganizationalUnits'][0]['nameCode']['shortName']
+
+                if total_units > 1:
+                    record.department = assignment['homeOrganizationalUnits'][1]['nameCode']['shortName']
+
+            if 'homeWorkLocation' in assignment and 'nameCode' in assignment['homeWorkLocation'] \
+                    and 'shortName' in assignment['homeWorkLocation']['nameCode']:
+                record.location = assignment['homeWorkLocation']['nameCode']['shortName']
 
             records.append(record)
 

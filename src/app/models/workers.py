@@ -4,34 +4,46 @@ from pydantic import BaseModel
 class WorkerRecord(BaseModel):
     """ The worker record represents a single employee export record. """
     id: str = ''
+    given_name: str = ''
+    middle_name: str = ''
+    family_name: str = ''
+    phone_number: str = ''
     legal_name: str = ''
     display_name: str = ''
     hire_date: str = ''
     termination_date: str = ''
     status_effective_date: str = ''
-    job_title: str = ''
     supervisor_id: str = ''
+    job_title: str = ''
+    division: str = ''
     department: str = ''
-    phone_number: str = ''
     location: str = ''
-    city_name: str = ''
-    state_code: str = ''
+
+    @property
+    def full_name(self) -> str:
+        """ Return the full name of the worker. """
+        return f'{self.given_name} {self.family_name}'
+
+    @property
+    def formatted_name(self) -> str:
+        """ Return the formatted name of the worker. """
+        return f'{self.family_name}, {self.given_name} {self.middle_name}'
 
     def row(self) -> tuple:
         return (
             self.id,
-            self.legal_name,
-            self.display_name,
+            self.given_name,
+            self.middle_name,
+            self.family_name,
+            self.phone_number,
             self.hire_date,
             self.termination_date,
             self.status_effective_date,
-            self.job_title,
             self.supervisor_id,
+            self.job_title,
+            self.division,
             self.department,
-            self.phone_number,
             self.location,
-            self.city_name,
-            self.state_code,
         )
 
     @staticmethod
