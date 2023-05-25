@@ -57,7 +57,7 @@ class SyncTasks:
                 logger.debug('AD users have been synchronized from ADP workers.')
 
                 logger.info('Saving post-synchronization reports...')
-                UsersAPI.save_reports(reports)
+                UsersAPI.save_reports(reports[0], reports[1])
             except ADSyncError as e:
                 response.status = AdStatic.STATUS_ERROR
                 response.error = str(e)
