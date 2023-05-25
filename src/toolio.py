@@ -5,6 +5,8 @@ from app.config import settings
 from app.lib.tasks.sync import SyncTasks
 
 
+dry_run: bool = '-d' in sys.argv
+
 """
 Setup logging
 """
@@ -33,7 +35,7 @@ if isinstance(settings.ad_username, str) and len(settings.ad_username) > 0:
 if len(pyad_defaults.keys()):
     pyad.set_defaults(**pyad_defaults)
 
-if '-d' in sys.argv:
+if dry_run:
     logger.warning('Dry-run execution mode enabled. No changes will be made to Active Directory users.')
 
-SyncTasks.sync_users_to_workers(dry_run=True)
+SyncTasks.sync_users_to_workers(dry_run=dry_run)
