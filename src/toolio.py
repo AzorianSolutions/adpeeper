@@ -33,4 +33,7 @@ if isinstance(settings.ad_username, str) and len(settings.ad_username) > 0:
 if len(pyad_defaults.keys()):
     pyad.set_defaults(**pyad_defaults)
 
+if '-d' in sys.argv:
+    logger.warning('Dry-run execution mode enabled. No changes will be made to Active Directory users.')
+
 SyncTasks.sync_users_to_workers(dry_run=True)
