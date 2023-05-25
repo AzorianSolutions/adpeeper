@@ -132,9 +132,9 @@ class UsersAPI:
 
             if user.identity != user.sam_account_name:
                 logger.debug(f'Updating identity for worker {worker.id} ({worker.full_name}).')
-                attributes['identity'] = user.sam_account_name
+                # attributes['identity'] = user.sam_account_name
                 actions_report.append(
-                    (worker.id, worker.full_name, 'identity', 'UPDATE', user.identity, user.sam_account_name))
+                    (worker.id, worker.full_name, 'identity', 'ALERT', user.identity, user.sam_account_name))
                 dirty = True
 
             if user.display_name != worker.full_name:
