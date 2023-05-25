@@ -98,7 +98,10 @@ class HRWorkersAPI(BaseAPI):
                     # Extract worker's department from the assignment
                     if 'typeCode' in unit and 'codeValue' in unit['typeCode'] \
                             and unit['typeCode']['codeValue'] == 'Department':
-                        record.department = unit['nameCode']['longName']
+                        if 'shortName' in unit['nameCode']:
+                            record.department = unit['nameCode']['shortName']
+                        if 'longName' in unit['nameCode']:
+                            record.department = unit['nameCode']['longName']
 
             if 'homeWorkLocation' in assignment and 'nameCode' in assignment['homeWorkLocation'] \
                     and 'shortName' in assignment['homeWorkLocation']['nameCode']:
