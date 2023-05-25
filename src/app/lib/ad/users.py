@@ -163,9 +163,6 @@ class UsersAPI:
 
         # Create a CSV report of actions taken
         if len(actions_report):
-            # if not os.access(settings.report_path_actions, os.W_OK):
-            #     raise ADSyncError(f'Cannot write to actions report file at {settings.report_path_actions}.')
-
             rows: list[list] = [['workerID', 'legalName', 'attribute', 'oldValue', 'newValue']]
 
             for action in actions_report:
@@ -180,9 +177,6 @@ class UsersAPI:
 
         # Create a CSV report of unlinked workers if there are any
         if len(unlinked_report):
-            # if not os.access(settings.report_path_unlinked, os.W_OK):
-            #     raise ADSyncError(f'Cannot write to unlinked report file at {settings.report_path_unlinked}.')
-
             rows: list[list] = [['workerID', 'legalName', 'displayName', 'jobTitle', 'department', 'location',
                                  'managerID']]
 
@@ -195,8 +189,7 @@ class UsersAPI:
                 writer.writerows(rows)
                 f.close()
 
-            logger.info(f'Created a report of unlinked workers at {settings.report_path_unlinked}.')
-            logger.debug(unlinked_report)
+            logger.info(f'Wrote unlinked workers report to {settings.report_path_unlinked}.')
 
     @staticmethod
     def find_user_by_name(users: list[UserRecord], name: str) -> UserRecord | None:
