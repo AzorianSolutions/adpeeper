@@ -95,7 +95,7 @@ class HRWorkersAPI(BaseAPI):
                     record.division = assignment['homeOrganizationalUnits'][0]['nameCode']['shortName']
 
                 if total_units > 1:
-                    record.department = assignment['homeOrganizationalUnits'][1]['nameCode']['shortName']
+                    record.department = assignment['homeOrganizationalUnits'][1]['nameCode']['longName']
 
             if 'homeWorkLocation' in assignment and 'nameCode' in assignment['homeWorkLocation'] \
                     and 'shortName' in assignment['homeWorkLocation']['nameCode']:
