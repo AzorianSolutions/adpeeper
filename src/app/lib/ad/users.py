@@ -211,7 +211,9 @@ class UsersAPI:
         import csv
 
         # Create a CSV report of actions taken
-        if len(actions_report):
+        if not len(actions_report):
+            logger.info('No actions to report.')
+        else:
             rows: list[list] = [['workerID', 'fullName', 'attribute', 'action', 'oldValue', 'newValue']]
 
             for action in actions_report:
@@ -225,7 +227,9 @@ class UsersAPI:
             logger.info(f'Wrote actions report to {settings.report_path_actions}.')
 
         # Create a CSV report of unlinked workers if there are any
-        if len(unlinked_report):
+        if not len(unlinked_report):
+            logger.info('No unlinked workers to report.')
+        else:
             rows: list[list] = [['workerID', 'fullName', 'jobTitle', 'division', 'department', 'location',
                                  'managerID', 'managerName']]
 
