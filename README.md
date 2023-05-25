@@ -4,19 +4,6 @@ ADPeeper is a Python 3 / FastAPI app that exports ADP HR worker data to CSV and/
 in third-party systems. Additionally, ADPeeper can be configured to directly synchronize worker data to
 Active Directory users.
 
-## TL;DR - Linux
-
-To get started quickly with a simple deployment, execute the following `bash` commands on a *nix based system
-with `git`, `python3`, `python3-pip`, and `python3-venv` installed:
-
-```
-git clone https://github.com/AzorianSolutions/adpeeper.git
-cd adpeeper
-./deploy/bare-metal/linux/debian.sh
-source venv/bin/activate
-adp run
-```
-
 ## TL;DR - Windows
 
 Start with checking out the project's official repository using git. The official repository can be
@@ -26,19 +13,19 @@ cloned from `https://github.com/AzorianSolutions/adpeeper.git`.
 cd C:/Path/To/Project/Root
 python3 -m venv venv
 venv\Scripts\activate
-pip install -r requirements.txt
-copy deploy\config\defaults.env deploy\config\local.env
+pip install -e .
+copy deploy\config\defaults.env deploy\config\production.env
 ```
 
-Edit the default settings as needed in `deploy\config\local.env`.
+Edit the default settings as needed in `deploy\config\production.env`.
 
 Then, run the following commands each time you want to activate the project for use:
 
 ```
 cd C:/Path/To/Project/Root
 venv\Scripts\activate
-for /F %A in (deploy\config\local.env) do SET %A
-adp run
+for /F %A in (deploy\config\production.env) do SET %A
+python src/toolio.py
 ```
 
 More detail coming eventually!
