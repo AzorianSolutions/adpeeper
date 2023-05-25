@@ -187,8 +187,8 @@ class UsersAPI:
 
             if user.office != worker.location:
                 logger.debug(f'Updating office for worker {worker.id} ({worker.full_name}).')
-                attributes['office'] = worker.location
-                actions_report.append((worker.id, worker.full_name, 'office', 'UPDATE', user.office, worker.location))
+                # attributes['office'] = worker.location
+                actions_report.append((worker.id, worker.full_name, 'office', 'ALERT', user.office, worker.location))
                 dirty = True
 
             if isinstance(worker.supervisor_id, str) and len(worker.supervisor_id) \
