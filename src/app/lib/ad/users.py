@@ -193,7 +193,7 @@ class UsersAPI:
                 if user.manager != supervisor.dn:
                     logger.debug(f'Updating manager for worker {worker.id} ({worker.full_name}).')
                     attributes['manager'] = supervisor.dn
-                    actions_report.append((worker.id, worker.full_name, 'office', user.manager, supervisor.dn))
+                    actions_report.append((worker.id, worker.full_name, 'manager', user.manager, supervisor.dn))
                     dirty = True
 
             if not dry_run and dirty:
