@@ -88,14 +88,17 @@ class HRWorkersAPI(BaseAPI):
             if 'jobTitle' in assignment:
                 record.job_title = assignment['jobTitle']
 
-            if 'homeOrganizationalUnits' in assignment:
-                total_units: int = len(assignment['homeOrganizationalUnits'])
+            if 'homeOrganizationalUnits' in assignment and isinstance(assignment['homeOrganizationalUnits'], list):
+                for unit in assignment['homeOrganizationalUnits']:
+                    # Extract worker's business unit / division from the assignment
+                    if 'typeCode' in unit and 'codeValue' in unit['typeCode'] \
+                            and unit['typeCode']['codeValue'] == 'Business Unit':
+                        record.division = unit['nameCode']['shortName']
 
-                if total_units > 0:
-                    record.division = assignment['homeOrganizationalUnits'][0]['nameCode']['shortName']
-
-                if total_units > 1:
-                    record.department = assignment['homeOrganizationalUnits'][1]['nameCode']['longName']
+                    # Extract worker's department from the assignment
+                    if 'typeCode' in unit and 'codeValue' in unit['typeCode'] \
+                            and unit['typeCode']['codeValue'] == 'Department':
+                        record.department = unit['nameCode']['shortName']
 
             if 'homeWorkLocation' in assignment and 'nameCode' in assignment['homeWorkLocation'] \
                     and 'shortName' in assignment['homeWorkLocation']['nameCode']:
