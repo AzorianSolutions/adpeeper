@@ -127,64 +127,64 @@ class UsersAPI:
             if user.employee_id != worker.id:
                 logger.debug(f'Updating employeeID for worker {worker.id} ({worker.full_name}).')
                 attributes['employeeID'] = worker.id
-                actions_report.append((worker.id, worker.full_name, 'employeeID', user.employee_id, worker.id))
+                actions_report.append((worker.id, worker.full_name, 'employeeID', 'UPDATE', user.employee_id, worker.id))
                 dirty = True
 
             if user.identity != user.sam_account_name:
                 logger.debug(f'Updating identity for worker {worker.id} ({worker.full_name}).')
                 attributes['identity'] = user.sam_account_name
-                actions_report.append((worker.id, worker.full_name, 'identity', user.identity, user.sam_account_name))
+                actions_report.append((worker.id, worker.full_name, 'identity', 'UPDATE', user.identity, user.sam_account_name))
                 dirty = True
 
             if user.display_name != worker.full_name:
-                logger.debug(f'Updating displayName for worker {worker.id} ({worker.full_name}).')
-                attributes['displayName'] = worker.full_name
-                actions_report.append((worker.id, worker.full_name, 'displayName', user.display_name,
+                logger.debug(f'Difference in displayName for worker {worker.id} ({worker.full_name}).')
+                # attributes['displayName'] = worker.full_name
+                actions_report.append((worker.id, worker.full_name, 'displayName', 'ALERT', user.display_name,
                                        worker.full_name))
                 dirty = True
 
             if user.mobile != worker.phone_number:
                 logger.debug(f'Updating mobile for worker {worker.id} ({worker.full_name}).')
                 attributes['mobile'] = worker.phone_number
-                actions_report.append((worker.id, worker.full_name, 'mobile', user.mobile,
+                actions_report.append((worker.id, worker.full_name, 'mobile', 'UPDATE', user.mobile,
                                        worker.phone_number))
                 dirty = True
 
             if user.office_phone != worker.phone_number:
                 logger.debug(f'Updating officePhone for worker {worker.id} ({worker.full_name}).')
                 attributes['officePhone'] = worker.phone_number
-                actions_report.append((worker.id, worker.full_name, 'officePhone', user.office_phone,
+                actions_report.append((worker.id, worker.full_name, 'officePhone', 'UPDATE', user.office_phone,
                                        worker.phone_number))
                 dirty = True
 
             if user.title != worker.job_title:
                 logger.debug(f'Updating title for worker {worker.id} ({worker.full_name}).')
                 attributes['title'] = worker.job_title
-                actions_report.append((worker.id, worker.full_name, 'title', user.title, worker.job_title))
+                actions_report.append((worker.id, worker.full_name, 'title', 'UPDATE', user.title, worker.job_title))
                 dirty = True
 
             if user.description != worker.job_title:
                 logger.debug(f'Updating description for worker {worker.id} ({worker.full_name}).')
                 attributes['description'] = worker.job_title
-                actions_report.append((worker.id, worker.full_name, 'description', user.description, worker.job_title))
+                actions_report.append((worker.id, worker.full_name, 'description', 'UPDATE', user.description, worker.job_title))
                 dirty = True
 
             if user.division != worker.division:
                 logger.debug(f'Updating division for worker {worker.id} ({worker.full_name}).')
                 attributes['division'] = worker.division
-                actions_report.append((worker.id, worker.full_name, 'division', user.division, worker.division))
+                actions_report.append((worker.id, worker.full_name, 'division', 'UPDATE', user.division, worker.division))
                 dirty = True
 
             if user.department != worker.department:
                 logger.debug(f'Updating department for worker {worker.id} ({worker.full_name}).')
                 attributes['department'] = worker.department
-                actions_report.append((worker.id, worker.full_name, 'department', user.department, worker.department))
+                actions_report.append((worker.id, worker.full_name, 'department', 'UPDATE', user.department, worker.department))
                 dirty = True
 
             if user.office != worker.location:
                 logger.debug(f'Updating office for worker {worker.id} ({worker.full_name}).')
                 attributes['office'] = worker.location
-                actions_report.append((worker.id, worker.full_name, 'office', user.office, worker.location))
+                actions_report.append((worker.id, worker.full_name, 'office', 'UPDATE', user.office, worker.location))
                 dirty = True
 
             if isinstance(worker.supervisor_id, str) and len(worker.supervisor_id) \
@@ -193,7 +193,7 @@ class UsersAPI:
                 if user.manager != supervisor.dn:
                     logger.debug(f'Updating manager for worker {worker.id} ({worker.full_name}).')
                     attributes['manager'] = supervisor.dn
-                    actions_report.append((worker.id, worker.full_name, 'manager', user.manager, supervisor.dn))
+                    actions_report.append((worker.id, worker.full_name, 'manager', 'UPDATE', user.manager, supervisor.dn))
                     dirty = True
 
             if not dry_run and dirty:
@@ -204,7 +204,7 @@ class UsersAPI:
 
         # Create a CSV report of actions taken
         if len(actions_report):
-            rows: list[list] = [['workerID', 'fullName', 'attribute', 'oldValue', 'newValue']]
+            rows: list[list] = [['workerID', 'fullName', 'attribute', 'action', 'oldValue', 'newValue']]
 
             for action in actions_report:
                 rows.append(list(action))
@@ -219,11 +219,11 @@ class UsersAPI:
         # Create a CSV report of unlinked workers if there are any
         if len(unlinked_report):
             rows: list[list] = [['workerID', 'fullName', 'jobTitle', 'division', 'department', 'location',
-                                 'managerID']]
+                                 'managerID', 'managerName']]
 
             for worker in unlinked_report:
                 rows.append([worker.id, worker.full_name, worker.job_title, worker.division, worker.department,
-                             worker.location, worker.supervisor_id])
+                             worker.location, worker.supervisor_id, worker.supervisor_name])
 
             with open(settings.report_path_unlinked, 'w') as f:
                 writer = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)

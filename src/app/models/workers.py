@@ -14,6 +14,7 @@ class WorkerRecord(BaseModel):
     termination_date: str = ''
     status_effective_date: str = ''
     supervisor_id: str = ''
+    supervisor_name: str = ''
     job_title: str = ''
     division: str = ''
     department: str = ''
@@ -40,6 +41,7 @@ class WorkerRecord(BaseModel):
             self.termination_date,
             self.status_effective_date,
             self.supervisor_id,
+            self.supervisor_name,
             self.job_title,
             self.division,
             self.department,

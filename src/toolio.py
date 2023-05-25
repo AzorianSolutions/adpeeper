@@ -4,13 +4,19 @@ from pyad import pyad
 from app.config import settings
 from app.lib.tasks.sync import SyncTasks
 
+
 """
 Setup logging
 """
-if settings.debug:
-    logger.add(sys.stderr, colorize=True, format="<green>{time}</green> <level>{message}</level>", level="TRACE")
-else:
-    logger.add(sys.stderr, colorize=True, format="<green>{time}</green> <level>{message}</level>", level="INFO")
+logger_params: dict = {
+    'colorize': True,
+    'format': '<green>{time}</green> <level>{message}</level>',
+    'level': 'TRACE' if settings.debug else 'INFO',
+}
+logger.remove()
+logger.add(sys.stderr, **logger_params)
+
+logger.warning(f'Debug Mode: {settings.debug}')
 
 """
 Setup Active Directory authentication if any overrides provided

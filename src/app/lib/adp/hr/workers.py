@@ -81,9 +81,12 @@ class HRWorkersAPI(BaseAPI):
                 if 'effectiveDate' in assignment['assignmentStatus']:
                     record.status_effective_date = assignment['assignmentStatus']['effectiveDate']
 
-            if 'reportsTo' in assignment and 'workerID' in assignment['reportsTo'][0] \
-                    and 'idValue' in assignment['reportsTo'][0]['workerID']:
-                record.supervisor_id = assignment['reportsTo'][0]['workerID']['idValue']
+            if 'reportsTo' in assignment and isinstance(assignment['reportsTo'], list) and len(assignment['reportsTo']):
+                supervisor: dict = assignment['reportsTo'][0]
+                if 'workerID' in supervisor and 'idValue' in supervisor['workerID']:
+                    record.supervisor_id = supervisor['workerID']['idValue']
+                if 'reportsToWorkerName' in supervisor and 'formattedName' in supervisor['reportsToWorkerName']:
+                    record.supervisor_name = supervisor['reportsToWorkerName']['formattedName']
 
             if 'jobTitle' in assignment:
                 record.job_title = assignment['jobTitle']
