@@ -204,7 +204,7 @@ class UsersAPI:
 
         # Create a CSV report of actions taken
         if len(actions_report):
-            rows: list[list] = [['workerID', 'legalName', 'attribute', 'oldValue', 'newValue']]
+            rows: list[list] = [['workerID', 'fullName', 'attribute', 'oldValue', 'newValue']]
 
             for action in actions_report:
                 rows.append(list(action))
@@ -218,11 +218,11 @@ class UsersAPI:
 
         # Create a CSV report of unlinked workers if there are any
         if len(unlinked_report):
-            rows: list[list] = [['workerID', 'legalName', 'displayName', 'jobTitle', 'department', 'location',
+            rows: list[list] = [['workerID', 'fullName', 'jobTitle', 'division', 'department', 'location',
                                  'managerID']]
 
             for worker in unlinked_report:
-                rows.append([worker.id, worker.full_name, worker.display_name, worker.job_title, worker.department,
+                rows.append([worker.id, worker.full_name, worker.job_title, worker.division, worker.department,
                              worker.location, worker.supervisor_id])
 
             with open(settings.report_path_unlinked, 'w') as f:
