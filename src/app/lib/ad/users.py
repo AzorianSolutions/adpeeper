@@ -183,12 +183,12 @@ class UsersAPI:
             # if not os.access(settings.report_path_unlinked, os.W_OK):
             #     raise ADSyncError(f'Cannot write to unlinked report file at {settings.report_path_unlinked}.')
 
-            rows: list[list] = [['workerID', 'legalName', 'formattedName', 'jobTitle', 'department', 'location',
+            rows: list[list] = [['workerID', 'legalName', 'displayName', 'jobTitle', 'department', 'location',
                                  'managerID']]
 
             for worker in unlinked_report:
-                rows.append([worker.id, worker.legal_name, worker.formatted_name, worker.job_title, worker.department,
-                             worker.location, worker.manager_id])
+                rows.append([worker.id, worker.legal_name, worker.display_name, worker.job_title, worker.department,
+                             worker.location, worker.supervisor_id])
 
             with open(settings.report_path_unlinked, 'w') as f:
                 writer = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
