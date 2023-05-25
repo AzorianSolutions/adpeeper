@@ -1,6 +1,4 @@
 from loguru import logger
-from pathlib import Path
-from app.config import settings
 from app.lib.adp.api.base import BaseAPI
 from app.lib.adp.api.exceptions import APIRequestDone
 from app.models.workers import WorkerRecord
@@ -96,32 +94,3 @@ class HRWorkersAPI(BaseAPI):
             logger.debug(f'Retrieved worker record: {record.dict()}')
 
         return records
-
-    @staticmethod
-    def export_workers(records: list[WorkerRecord] = None):
-        export_formats: str = ', '.join(settings.export_formats)
-        export_path: str = str(Path(settings.export_path) / settings.export_file_name)
-
-        logger.info(f'Exporting {len(records)} employee records in [{export_formats}] format(s).')
-
-        if 'csv' in settings.export_formats:
-            import csv
-
-            logger.info(f'Saving employee records CSV to: {export_path}.csv')
-
-            with open(export_path + '.csv', 'w', newline='') as f:
-                writer = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                writer.writerow(settings.export_headers)
-                writer.writerows(WorkerRecord.records_to_rows(records))
-                f.close()
-
-        if 'json' in settings.export_formats:
-            import jsonpickle
-
-            logger.info(f'Saving employee records JSON to: {export_path}.json')
-
-            with open(export_path + '.json', 'w') as f:
-                f.write(jsonpickle.encode(records))
-                f.close()
-
-        logger.success(f'Finished exporting ADP workers to file system.')

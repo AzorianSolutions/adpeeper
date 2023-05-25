@@ -9,6 +9,8 @@ Setup logging
 """
 if settings.debug:
     logger.add(sys.stderr, colorize=True, format="<green>{time}</green> <level>{message}</level>", level="TRACE")
+else:
+    logger.add(sys.stderr, colorize=True, format="<green>{time}</green> <level>{message}</level>", level="INFO")
 
 """
 Setup Active Directory authentication if any overrides provided

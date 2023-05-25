@@ -9,7 +9,7 @@ ROOT_PATH: Path = Path(__file__).parent.parent.parent
 SRC_PATH: Path = ROOT_PATH / 'src'
 """ The source path of the application which is typically the src directory within the ROOT_PATH. """
 
-DEFAULT_ENV_PATH: Path = Path('/etc/adpeeper/adpeeper.env')
+DEFAULT_ENV_PATH: Path = Path('C:\\ADPeeper\\deploy\\config\\production.env')
 """ The default path to the environment file to load settings from. """
 
 DEFAULT_SECRETS_PATH: Path | None = None
@@ -32,26 +32,11 @@ class AppSettings(BaseSettings):
     adp_ssl_key_path: str | None = None
     adp_token_server_url: str = 'https://api.adp.com/auth/oauth/v2/token'
     adp_user_agent: str = 'ADPeeper/0.1.0'
-    config_path: str = '/etc/adpeeper/config.yml'
-    cors_allow_credentials: bool = True
-    cors_headers: list[str] = ['*']
-    cors_methods: list[str] = ['*']
-    cors_origins: list[str] = ['http://127.0.0.1', 'http://127.0.0.1:8080', 'http://localhost', 'http://localhost:8080']
+    config_path: str = 'C:\\ADPeeper\\config.yml'
     debug: bool = False
-    export_file_name: str = 'adp-workers-export'
-    export_formats: list[str] = ['csv', 'json']  # csv, json
-    export_headers: tuple | str = ('Payroll Name', 'Associate ID', 'Hire Date', 'Termination Date',
-                                   'Status Effective Date', 'Job Title Description', 'Reports To Legal Name',
-                                   'Location Description', 'Work Contact: Work Phone')
-    export_interval: int = 1440  # 24 hours
-    export_path: str = '/var/tmp/adpeeper'
-    proxy_root: str = '/'
+    report_path_actions: str = 'C:\\ADPeeper\\actions.csv'
+    report_path_unlinked: str = 'C:\\ADPeeper\\unlinked.csv'
     root_path: str = str(ROOT_PATH)
-    salt: str | None = None
-    secret_key: str = 'INSECURE-CHANGE-ME-6up8zksTD6mi4N3z3zFk'
-    server_address: str = '0.0.0.0'
-    server_port: int = 8080
-    server_type: str | None = 'uvicorn'  # gunicorn, uvicorn, uwsgi
 
     version: str = '0.1.0'
     """ The application version number """

@@ -1,3 +1,4 @@
+import os
 from loguru import logger
 from pyad import adquery, pyad
 from app.config import settings
@@ -84,6 +85,7 @@ class UsersAPI:
 
     @staticmethod
     def sync_from_workers(users: list[UserRecord], workers: list[WorkerRecord], dry_run: bool = False):
+        import csv
 
         if not isinstance(users, list):
             raise TypeError('users argument must be a list of UserRecord objects.')
@@ -98,7 +100,8 @@ class UsersAPI:
             raise ValueError('workers argument must not be empty.')
 
         user_map: dict[str, UserRecord] = UsersAPI.map_users('employee_id', users)
-        missing_users: list[WorkerRecord] = []
+        actions_report: list[tuple] = []
+        unlinked_report: list[WorkerRecord] = []
 
         for worker in workers:
             logger.debug(f'Syncing worker {worker.legal_name} to Active Directory...')
@@ -112,7 +115,7 @@ class UsersAPI:
                 user = UsersAPI.find_user_by_name(users, worker.legal_name)
 
             if user is None:
-                missing_users.append(worker)
+                unlinked_report.append(worker)
                 logger.error(f'Could not find user record for worker {worker.id} ({worker.legal_name}).')
                 continue
 
@@ -124,33 +127,76 @@ class UsersAPI:
             if user.employee_id != worker.id:
                 logger.debug(f'Updating employeeID for worker {worker.id} ({worker.legal_name}).')
                 attributes['employeeID'] = worker.id
+                actions_report.append((worker.id, worker.legal_name, 'employeeID', user.employee_id, worker.id))
                 dirty = True
 
             if user.identity != user.sam_account_name:
                 logger.debug(f'Updating identity for worker {worker.id} ({worker.legal_name}).')
                 attributes['identity'] = user.sam_account_name
+                actions_report.append((worker.id, worker.legal_name, 'identity', user.identity, user.sam_account_name))
                 dirty = True
 
             if user.display_name != worker.legal_name:
                 logger.debug(f'Updating displayName for worker {worker.id} ({worker.legal_name}).')
                 attributes['displayName'] = worker.legal_name
+                actions_report.append((worker.id, worker.legal_name, 'displayName', user.display_name,
+                                       worker.legal_name))
                 dirty = True
 
             if user.title != worker.job_title:
                 logger.debug(f'Updating title for worker {worker.id} ({worker.legal_name}).')
                 attributes['title'] = worker.job_title
+                actions_report.append((worker.id, worker.legal_name, 'title', user.title, worker.job_title))
                 dirty = True
 
             if user.description != worker.job_title:
                 logger.debug(f'Updating description for worker {worker.id} ({worker.legal_name}).')
                 attributes['description'] = worker.job_title
+                actions_report.append((worker.id, worker.legal_name, 'description', user.description, worker.job_title))
                 dirty = True
 
             if not dry_run and dirty:
                 pyad.from_dn(user.dn).update_attributes(attributes)
 
-        if not dry_run:
-            logger.success(f'Finished synchronizing ADP workers to Active Directory users.')
+        logger.success(f'Finished ' + (' dry-run of' if dry_run else '')
+                       + 'synchronizing ADP workers to Active Directory users.')
+
+        # Create a CSV report of actions taken
+        if len(actions_report):
+            if not os.access(settings.report_path_actions, os.W_OK):
+                raise ADSyncError(f'Cannot write to actions report file at {settings.report_path_actions}.')
+
+            rows: list[list] = [['workerID', 'legalName', 'attribute', 'oldValue', 'newValue']]
+
+            for action in actions_report:
+                rows.append(list(action))
+
+            with open(settings.report_path_actions, 'w') as f:
+                writer = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                writer.writerows(rows)
+                f.close()
+
+            logger.info(f'Wrote actions report to {settings.report_path_actions}.')
+
+        # Create a CSV report of unlinked workers if there are any
+        if len(unlinked_report):
+            if not os.access(settings.report_path_unlinked, os.W_OK):
+                raise ADSyncError(f'Cannot write to unlinked report file at {settings.report_path_unlinked}.')
+
+            rows: list[list] = [['workerID', 'legalName', 'formattedName', 'jobTitle', 'department', 'location',
+                                 'managerID']]
+
+            for worker in unlinked_report:
+                rows.append([worker.id, worker.legal_name, worker.formatted_name, worker.job_title, worker.department,
+                             worker.location, worker.manager_id])
+
+            with open(settings.report_path_unlinked, 'w') as f:
+                writer = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                writer.writerows(rows)
+                f.close()
+
+            logger.info(f'Created a report of unlinked workers at {settings.report_path_unlinked}.')
+            logger.debug(unlinked_report)
 
     @staticmethod
     def find_user_by_name(users: list[UserRecord], name: str) -> UserRecord | None:
