@@ -170,7 +170,7 @@ class UsersAPI:
                 user_value_str: str = str(user_value).strip()
                 worker_value: str = str(getattr(worker, worker_property)).strip()
 
-                if field_type == UsersAPI.FIELD_TYPE_LIST:
+                if field_type == UsersAPI.FIELD_TYPE_LIST and isinstance(user_value, list):
                     final_value: list = list(user_value)
                     if worker_value not in final_value:
                         user_value_str = ', '.join(final_value)
@@ -180,7 +180,8 @@ class UsersAPI:
                             dirty = True
 
                 elif field_type in (UsersAPI.FIELD_TYPE_STR, UsersAPI.FIELD_TYPE_INT):
-                    if user_value != worker_value:
+                    user_value_str = '' if user_value is None else user_value_str
+                    if user_value_str != worker_value:
                         different = True
                         if action_type == UsersAPI.ACTION_TYPE_UPDATE:
                             attributes[user_property] = worker_value
