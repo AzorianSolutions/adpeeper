@@ -177,7 +177,7 @@ class UsersAPI:
 
             if str(worker.job_title).strip() not in str(user.description).strip():
                 logger.debug(f'Updating description for worker {worker.id} ({worker.full_name}).')
-                attributes['description'] = user.description + [worker.job_title]
+                attributes['description'] = list(user.description) + [worker.job_title]
                 actions_report.append((worker.id, worker.full_name, 'description', 'UPDATE',
                                        "\n".join(user.description), worker.job_title))
                 dirty = True
