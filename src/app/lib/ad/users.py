@@ -144,14 +144,14 @@ class UsersAPI:
                 # attributes['identity'] = user.sam_account_name
                 actions_report.append(
                     (worker.id, worker.full_name, 'identity', 'ALERT', user.identity, user.sam_account_name))
-                dirty = True
+                # dirty = True
 
             if user.display_name != worker.full_name:
                 logger.debug(f'Difference in displayName for worker {worker.id} ({worker.full_name}).')
                 # attributes['displayName'] = worker.full_name
                 actions_report.append((worker.id, worker.full_name, 'displayName', 'ALERT', user.display_name,
                                        worker.full_name))
-                dirty = True
+                # dirty = True
 
             if user.mobile != worker.phone_number:
                 logger.debug(f'Updating mobile for worker {worker.id} ({worker.full_name}).')
@@ -213,6 +213,7 @@ class UsersAPI:
                     dirty = True
 
             if not dry_run and dirty:
+                logger.debug(f'Updating AD user attributes for worker {worker.id} ({worker.full_name})...')
                 pyad.from_dn(user.dn).update_attributes(attributes)
 
         return actions_report, unlinked_report
