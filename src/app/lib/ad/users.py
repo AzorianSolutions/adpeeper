@@ -42,7 +42,9 @@ class UsersAPI:
     def build_users() -> list[UserRecord]:
         records: list[UserRecord] = []
         params: dict = {
-            'attributes': ['employeeID', 'canonicalName', 'distinguishedName', 'samAccountName', 'displayName'],
+            'attributes': ['employeeID', 'canonicalName', 'distinguishedName', 'samAccountName', 'displayName',
+                           'manager', 'division', 'department', 'title', 'description', 'physicalDeliveryOfficeName',
+                           'telephoneNumber'],
         }
         users: list = UsersAPI.get_users(params=params)
 
@@ -55,6 +57,13 @@ class UsersAPI:
             record.dn = user['distinguishedName']
             record.sam_account_name = user['samAccountName']
             record.display_name = user['displayName']
+            record.manager = user['manager']
+            record.division = user['division']
+            record.department = user['department']
+            record.title = user['title']
+            record.description = user['description']
+            record.office = user['physicalDeliveryOfficeName']
+            record.office_phone = user['telephoneNumber']
 
             records.append(record)
 
@@ -152,9 +161,9 @@ class UsersAPI:
                 dirty = True
 
             if user.office_phone != worker.phone_number:
-                logger.debug(f'Updating officePhone for worker {worker.id} ({worker.full_name}).')
-                # attributes['officePhone'] = worker.phone_number
-                actions_report.append((worker.id, worker.full_name, 'officePhone', 'ALERT', user.office_phone,
+                logger.debug(f'Updating telephoneNumber for worker {worker.id} ({worker.full_name}).')
+                attributes['telephoneNumber'] = worker.phone_number
+                actions_report.append((worker.id, worker.full_name, 'telephoneNumber', 'UPDATE', user.office_phone,
                                        worker.phone_number))
                 dirty = True
 
@@ -186,9 +195,10 @@ class UsersAPI:
                 dirty = True
 
             if user.office != worker.location:
-                logger.debug(f'Updating office for worker {worker.id} ({worker.full_name}).')
-                # attributes['office'] = worker.location
-                actions_report.append((worker.id, worker.full_name, 'office', 'ALERT', user.office, worker.location))
+                logger.debug(f'Updating physicalDeliveryOfficeName for worker {worker.id} ({worker.full_name}).')
+                attributes['physicalDeliveryOfficeName'] = worker.location
+                actions_report.append((worker.id, worker.full_name, 'physicalDeliveryOfficeName', 'UPDATE', user.office,
+                                       worker.location))
                 dirty = True
 
             if isinstance(worker.supervisor_id, str) and len(worker.supervisor_id) \
