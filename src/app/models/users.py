@@ -7,7 +7,7 @@ class UserRecord(BaseModel):
     company: str = 'Point Broadband'
     cn: str = ''
     department: str = ''
-    description: str = ''
+    description: list[str] = ''
     display_name: str = ''
     division: str = ''
     dn: str = ''
@@ -26,7 +26,7 @@ class UserRecord(BaseModel):
             self.company,
             self.cn,
             self.department,
-            self.description,
+            "\n".join(self.description),
             self.display_name,
             self.division,
             self.dn,

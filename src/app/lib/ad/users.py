@@ -160,7 +160,8 @@ class UsersAPI:
                                        worker.phone_number))
                 dirty = True
 
-            if user.office_phone != worker.phone_number:
+            if isinstance(worker.phone_number, str) and len(worker.phone_number.strip()) \
+                    and user.office_phone != worker.phone_number:
                 logger.debug(f'Updating telephoneNumber for worker {worker.id} ({worker.full_name}).')
                 attributes['telephoneNumber'] = worker.phone_number
                 actions_report.append((worker.id, worker.full_name, 'telephoneNumber', 'UPDATE', user.office_phone,
@@ -173,11 +174,11 @@ class UsersAPI:
                 actions_report.append((worker.id, worker.full_name, 'title', 'UPDATE', user.title, worker.job_title))
                 dirty = True
 
-            if user.description != worker.job_title:
+            if worker.job_title not in user.description:
                 logger.debug(f'Updating description for worker {worker.id} ({worker.full_name}).')
-                attributes['description'] = worker.job_title
-                actions_report.append(
-                    (worker.id, worker.full_name, 'description', 'UPDATE', user.description, worker.job_title))
+                attributes['description'] = user.description + [worker.job_title]
+                actions_report.append((worker.id, worker.full_name, 'description', 'UPDATE',
+                                       "\n".join(user.description), worker.job_title))
                 dirty = True
 
             if user.division != worker.division:
