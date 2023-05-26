@@ -8,6 +8,12 @@ from app.models.workers import WorkerRecord
 
 
 class UsersAPI:
+    ACTION_TYPE_ALERT: str = 'alert'
+    ACTION_TYPE_UPDATE: str = 'update'
+    FIELD_TYPE_DICT: str = 'dict'
+    FIELD_TYPE_INT: str = 'int'
+    FIELD_TYPE_LIST: str = 'list'
+    FIELD_TYPE_STR: str = 'str'
 
     @staticmethod
     def get_users(params: dict = None) -> list:
@@ -132,75 +138,58 @@ class UsersAPI:
 
             dirty: bool = False
             attributes: dict = {}
+            field_map: dict = {
+                'employeeID': (UsersAPI.ACTION_TYPE_UPDATE, 'id', UsersAPI.FIELD_TYPE_STR),
+                'identity': (UsersAPI.ACTION_TYPE_ALERT, 'sam_account_name', UsersAPI.FIELD_TYPE_STR),
+                'displayName': (UsersAPI.ACTION_TYPE_ALERT, 'full_name', UsersAPI.FIELD_TYPE_STR),
+                'mobile': (UsersAPI.ACTION_TYPE_UPDATE, 'phone_number', UsersAPI.FIELD_TYPE_LIST),
+                'telephoneNumber': (UsersAPI.ACTION_TYPE_UPDATE, 'phone_number', UsersAPI.FIELD_TYPE_LIST),
+                'title': (UsersAPI.ACTION_TYPE_UPDATE, 'job_title', UsersAPI.FIELD_TYPE_STR),
+                'description': (UsersAPI.ACTION_TYPE_UPDATE, 'job_title', UsersAPI.FIELD_TYPE_LIST),
+                'division': (UsersAPI.ACTION_TYPE_UPDATE, 'division', UsersAPI.FIELD_TYPE_STR),
+                'department': (UsersAPI.ACTION_TYPE_UPDATE, 'department', UsersAPI.FIELD_TYPE_STR),
+                'physicalDeliveryOfficeName': (UsersAPI.ACTION_TYPE_UPDATE, 'location', UsersAPI.FIELD_TYPE_STR),
+            }
 
-            if str(user.employee_id).strip() != str(worker.id).strip():
-                logger.debug(f'Updating employeeID for worker {worker.id} ({worker.full_name}).')
-                attributes['employeeID'] = worker.id
-                actions_report.append(
-                    (worker.id, worker.full_name, 'employeeID', 'UPDATE', user.employee_id, worker.id))
-                dirty = True
+            for user_property, (action_type, worker_property, field_type) in field_map.items():
+                if not hasattr(user, user_property):
+                    logger.error(f'User record for worker {worker.id} ({worker.full_name}) does not have '
+                                 f'a {user_property} attribute.')
+                    continue
 
-            if str(user.identity).strip() != str(user.sam_account_name).strip():
-                logger.debug(f'Difference in identity for worker {worker.id} ({worker.full_name}).')
-                # attributes['identity'] = user.sam_account_name
-                actions_report.append(
-                    (worker.id, worker.full_name, 'identity', 'ALERT', user.identity, user.sam_account_name))
-                # dirty = True
+                if not hasattr(worker, worker_property):
+                    logger.error(f'Worker record for worker {worker.id} ({worker.full_name}) does not have '
+                                 f'a {worker_property} attribute.')
+                    continue
 
-            if str(user.display_name).strip() != str(worker.full_name).strip():
-                logger.debug(f'Difference in displayName for worker {worker.id} ({worker.full_name}).')
-                # attributes['displayName'] = worker.full_name
-                actions_report.append((worker.id, worker.full_name, 'displayName', 'ALERT', user.display_name,
-                                       worker.full_name))
-                # dirty = True
+                log_msg: str = 'Updating' if action_type == UsersAPI.ACTION_TYPE_UPDATE else 'Alerting'
+                log_msg += f' {user_property} for worker {worker.id} ({worker.full_name}).'
 
-            if str(user.mobile).strip() != str(worker.phone_number).strip():
-                logger.debug(f'Updating mobile for worker {worker.id} ({worker.full_name}).')
-                attributes['mobile'] = worker.phone_number
-                actions_report.append((worker.id, worker.full_name, 'mobile', 'UPDATE', user.mobile,
-                                       worker.phone_number))
-                dirty = True
+                different: bool = False
+                user_value = getattr(user, user_property)
+                user_value_str: str = str(user_value).strip()
+                worker_value: str = str(getattr(worker, worker_property)).strip()
 
-            if str(user.office_phone).strip() != str(worker.phone_number).strip():
-                logger.debug(f'Updating telephoneNumber for worker {worker.id} ({worker.full_name}).')
-                attributes['telephoneNumber'] = worker.phone_number
-                actions_report.append((worker.id, worker.full_name, 'telephoneNumber', 'UPDATE', user.office_phone,
-                                       worker.phone_number))
-                dirty = True
+                if field_type == UsersAPI.FIELD_TYPE_LIST:
+                    final_value: list = list(user_value)
+                    if worker_value not in final_value:
+                        user_value_str = ', '.join(final_value)
+                        different = True
+                        if action_type == UsersAPI.ACTION_TYPE_UPDATE:
+                            attributes[user_property] = final_value + [worker_value]
+                            dirty = True
 
-            if str(user.title).strip() != str(worker.job_title).strip():
-                logger.debug(f'Updating title for worker {worker.id} ({worker.full_name}).')
-                attributes['title'] = worker.job_title
-                actions_report.append((worker.id, worker.full_name, 'title', 'UPDATE', user.title, worker.job_title))
-                dirty = True
+                elif field_type in (UsersAPI.FIELD_TYPE_STR, UsersAPI.FIELD_TYPE_INT):
+                    if user_value != worker_value:
+                        different = True
+                        if action_type == UsersAPI.ACTION_TYPE_UPDATE:
+                            attributes[user_property] = worker_value
+                            dirty = True
 
-            if str(worker.job_title).strip() not in str(user.description).strip():
-                logger.debug(f'Updating description for worker {worker.id} ({worker.full_name}).')
-                attributes['description'] = list(user.description) + [worker.job_title]
-                actions_report.append((worker.id, worker.full_name, 'description', 'UPDATE',
-                                       "\n".join(user.description), worker.job_title))
-                dirty = True
-
-            if str(user.division).strip() != str(worker.division).strip():
-                logger.debug(f'Updating division for worker {worker.id} ({worker.full_name}).')
-                attributes['division'] = worker.division
-                actions_report.append(
-                    (worker.id, worker.full_name, 'division', 'UPDATE', user.division, worker.division))
-                dirty = True
-
-            if str(user.department).strip() != str(worker.department).strip():
-                logger.debug(f'Updating department for worker {worker.id} ({worker.full_name}).')
-                attributes['department'] = worker.department
-                actions_report.append(
-                    (worker.id, worker.full_name, 'department', 'UPDATE', user.department, worker.department))
-                dirty = True
-
-            if str(user.office).strip() != str(worker.location).strip():
-                logger.debug(f'Updating physicalDeliveryOfficeName for worker {worker.id} ({worker.full_name}).')
-                attributes['physicalDeliveryOfficeName'] = worker.location
-                actions_report.append((worker.id, worker.full_name, 'physicalDeliveryOfficeName', 'UPDATE', user.office,
-                                       worker.location))
-                dirty = True
+                if different:
+                    logger.debug(log_msg)
+                    actions_report.append(
+                        (worker.id, worker.full_name, user_property, action_type, user_value_str, worker_value))
 
             if isinstance(worker.supervisor_id, str) and len(worker.supervisor_id) \
                     and str(worker.supervisor_id).strip() in user_map:
@@ -208,9 +197,9 @@ class UsersAPI:
                 if str(user.manager).strip() != str(supervisor.dn).strip():
                     logger.debug(f'Updating manager for worker {worker.id} ({worker.full_name}).')
                     attributes['manager'] = supervisor.dn
+                    dirty = True
                     actions_report.append(
                         (worker.id, worker.full_name, 'manager', 'UPDATE', user.manager, supervisor.dn))
-                    dirty = True
 
             if not dry_run and dirty:
                 logger.debug(f'Updating AD user attributes for worker {worker.id} ({worker.full_name})...')
@@ -255,6 +244,7 @@ class UsersAPI:
                 f.close()
 
             logger.info(f'Wrote unlinked workers report to {settings.report_path_unlinked}.')
+
 
     @staticmethod
     def find_user_by_name(users: list[UserRecord], name: str) -> UserRecord | None:
