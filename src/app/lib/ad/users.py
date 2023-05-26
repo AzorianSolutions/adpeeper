@@ -64,6 +64,7 @@ class UsersAPI:
             record.description = user['description']
             record.office = user['physicalDeliveryOfficeName']
             record.office_phone = user['telephoneNumber']
+            record.mobile = user['mobile']
 
             records.append(record)
 
