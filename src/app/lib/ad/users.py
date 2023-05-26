@@ -44,7 +44,7 @@ class UsersAPI:
         params: dict = {
             'attributes': ['employeeID', 'canonicalName', 'distinguishedName', 'samAccountName', 'displayName',
                            'manager', 'division', 'department', 'title', 'description', 'physicalDeliveryOfficeName',
-                           'telephoneNumber'],
+                           'telephoneNumber', 'mobile'],
         }
         users: list = UsersAPI.get_users(params=params)
 
