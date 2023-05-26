@@ -200,8 +200,8 @@ class UsersAPI:
                     logger.debug(f'Updating manager for worker {worker.id} ({worker.full_name}).')
                     attributes['manager'] = supervisor.dn
                     dirty = True
-                    actions_report.append(
-                        (worker.id, worker.full_name, 'manager', 'UPDATE', user.manager, supervisor.dn))
+                    actions_report.append((worker.id, worker.full_name, 'manager', UsersAPI.ACTION_TYPE_UPDATE,
+                                           user.manager, supervisor.dn))
 
             if not dry_run and dirty:
                 logger.debug(f'Updating AD user attributes for worker {worker.id} ({worker.full_name})...')
