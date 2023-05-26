@@ -132,28 +132,28 @@ class UsersAPI:
             dirty: bool = False
             attributes: dict = {}
 
-            if user.employee_id != worker.id:
+            if str(user.employee_id).strip() != str(worker.id).strip():
                 logger.debug(f'Updating employeeID for worker {worker.id} ({worker.full_name}).')
                 attributes['employeeID'] = worker.id
                 actions_report.append(
                     (worker.id, worker.full_name, 'employeeID', 'UPDATE', user.employee_id, worker.id))
                 dirty = True
 
-            if user.identity != user.sam_account_name:
+            if str(user.identity).strip() != str(user.sam_account_name).strip():
                 logger.debug(f'Difference in identity for worker {worker.id} ({worker.full_name}).')
                 # attributes['identity'] = user.sam_account_name
                 actions_report.append(
                     (worker.id, worker.full_name, 'identity', 'ALERT', user.identity, user.sam_account_name))
                 # dirty = True
 
-            if user.display_name != worker.full_name:
+            if str(user.display_name).strip() != str(worker.full_name).strip():
                 logger.debug(f'Difference in displayName for worker {worker.id} ({worker.full_name}).')
                 # attributes['displayName'] = worker.full_name
                 actions_report.append((worker.id, worker.full_name, 'displayName', 'ALERT', user.display_name,
                                        worker.full_name))
                 # dirty = True
 
-            if user.mobile != worker.phone_number:
+            if str(user.mobile).strip() != str(worker.phone_number).strip():
                 logger.debug(f'Updating mobile for worker {worker.id} ({worker.full_name}).')
                 attributes['mobile'] = worker.phone_number
                 actions_report.append((worker.id, worker.full_name, 'mobile', 'UPDATE', user.mobile,
@@ -161,41 +161,41 @@ class UsersAPI:
                 dirty = True
 
             if isinstance(worker.phone_number, str) and len(worker.phone_number.strip()) \
-                    and user.office_phone != worker.phone_number:
+                    and str(user.office_phone).strip() != str(worker.phone_number).strip():
                 logger.debug(f'Updating telephoneNumber for worker {worker.id} ({worker.full_name}).')
                 attributes['telephoneNumber'] = worker.phone_number
                 actions_report.append((worker.id, worker.full_name, 'telephoneNumber', 'UPDATE', user.office_phone,
                                        worker.phone_number))
                 dirty = True
 
-            if user.title != worker.job_title:
+            if str(user.title).strip() != str(worker.job_title).strip():
                 logger.debug(f'Updating title for worker {worker.id} ({worker.full_name}).')
                 attributes['title'] = worker.job_title
                 actions_report.append((worker.id, worker.full_name, 'title', 'UPDATE', user.title, worker.job_title))
                 dirty = True
 
-            if worker.job_title not in user.description:
+            if str(worker.job_title).strip() not in str(user.description).strip():
                 logger.debug(f'Updating description for worker {worker.id} ({worker.full_name}).')
                 attributes['description'] = user.description + [worker.job_title]
                 actions_report.append((worker.id, worker.full_name, 'description', 'UPDATE',
                                        "\n".join(user.description), worker.job_title))
                 dirty = True
 
-            if user.division != worker.division:
+            if str(user.division).strip() != str(worker.division).strip():
                 logger.debug(f'Updating division for worker {worker.id} ({worker.full_name}).')
                 attributes['division'] = worker.division
                 actions_report.append(
                     (worker.id, worker.full_name, 'division', 'UPDATE', user.division, worker.division))
                 dirty = True
 
-            if user.department != worker.department:
+            if str(user.department).strip() != str(worker.department).strip():
                 logger.debug(f'Updating department for worker {worker.id} ({worker.full_name}).')
                 attributes['department'] = worker.department
                 actions_report.append(
                     (worker.id, worker.full_name, 'department', 'UPDATE', user.department, worker.department))
                 dirty = True
 
-            if user.office != worker.location:
+            if str(user.office).strip() != str(worker.location).strip():
                 logger.debug(f'Updating physicalDeliveryOfficeName for worker {worker.id} ({worker.full_name}).')
                 attributes['physicalDeliveryOfficeName'] = worker.location
                 actions_report.append((worker.id, worker.full_name, 'physicalDeliveryOfficeName', 'UPDATE', user.office,
@@ -203,9 +203,9 @@ class UsersAPI:
                 dirty = True
 
             if isinstance(worker.supervisor_id, str) and len(worker.supervisor_id) \
-                    and worker.supervisor_id in user_map:
+                    and str(worker.supervisor_id).strip() in user_map:
                 supervisor: UserRecord = user_map[worker.supervisor_id]
-                if user.manager != supervisor.dn:
+                if str(user.manager).strip() != str(supervisor.dn).strip():
                     logger.debug(f'Updating manager for worker {worker.id} ({worker.full_name}).')
                     attributes['manager'] = supervisor.dn
                     actions_report.append(
