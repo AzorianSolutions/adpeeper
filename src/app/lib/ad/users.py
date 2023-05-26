@@ -138,20 +138,21 @@ class UsersAPI:
 
             dirty: bool = False
             attributes: dict = {}
-            field_map: dict = {
-                'employeeID': (UsersAPI.ACTION_TYPE_UPDATE, 'id', UsersAPI.FIELD_TYPE_STR),
-                'identity': (UsersAPI.ACTION_TYPE_ALERT, 'sam_account_name', UsersAPI.FIELD_TYPE_STR),
-                'displayName': (UsersAPI.ACTION_TYPE_ALERT, 'full_name', UsersAPI.FIELD_TYPE_STR),
-                'mobile': (UsersAPI.ACTION_TYPE_UPDATE, 'phone_number', UsersAPI.FIELD_TYPE_LIST),
-                'telephoneNumber': (UsersAPI.ACTION_TYPE_UPDATE, 'phone_number', UsersAPI.FIELD_TYPE_LIST),
-                'title': (UsersAPI.ACTION_TYPE_UPDATE, 'job_title', UsersAPI.FIELD_TYPE_STR),
-                'description': (UsersAPI.ACTION_TYPE_UPDATE, 'job_title', UsersAPI.FIELD_TYPE_LIST),
-                'division': (UsersAPI.ACTION_TYPE_UPDATE, 'division', UsersAPI.FIELD_TYPE_STR),
-                'department': (UsersAPI.ACTION_TYPE_UPDATE, 'department', UsersAPI.FIELD_TYPE_STR),
-                'physicalDeliveryOfficeName': (UsersAPI.ACTION_TYPE_UPDATE, 'location', UsersAPI.FIELD_TYPE_STR),
-            }
+            field_map: list[tuple] = [
+                (UsersAPI.ACTION_TYPE_UPDATE, 'employee_id', 'employeeID', 'id', UsersAPI.FIELD_TYPE_STR),
+                (UsersAPI.ACTION_TYPE_ALERT, 'display_name', 'displayName', 'full_name', UsersAPI.FIELD_TYPE_STR),
+                (UsersAPI.ACTION_TYPE_UPDATE, 'office_phone', 'mobile', 'phone_number', UsersAPI.FIELD_TYPE_LIST),
+                (UsersAPI.ACTION_TYPE_UPDATE, 'office_phone', 'telephoneNumber', 'phone_number',
+                 UsersAPI.FIELD_TYPE_LIST),
+                (UsersAPI.ACTION_TYPE_UPDATE, 'title', 'title', 'job_title', UsersAPI.FIELD_TYPE_STR),
+                (UsersAPI.ACTION_TYPE_UPDATE, 'description', 'description', 'job_title', UsersAPI.FIELD_TYPE_LIST),
+                (UsersAPI.ACTION_TYPE_UPDATE, 'division', 'division', 'division', UsersAPI.FIELD_TYPE_STR),
+                (UsersAPI.ACTION_TYPE_UPDATE, 'department', 'department', 'department', UsersAPI.FIELD_TYPE_STR),
+                (UsersAPI.ACTION_TYPE_UPDATE, 'office', 'physicalDeliveryOfficeName', 'location',
+                 UsersAPI.FIELD_TYPE_STR),
+            ]
 
-            for user_property, (action_type, worker_property, field_type) in field_map.items():
+            for (action_type, user_property, ad_property, worker_property, field_type) in field_map:
                 if not hasattr(user, user_property):
                     logger.error(f'User record for worker {worker.id} ({worker.full_name}) does not have '
                                  f'a {user_property} attribute.')
@@ -163,7 +164,7 @@ class UsersAPI:
                     continue
 
                 log_msg: str = 'Updating' if action_type == UsersAPI.ACTION_TYPE_UPDATE else 'Alerting'
-                log_msg += f' {user_property} for worker {worker.id} ({worker.full_name}).'
+                log_msg += f' {ad_property} for worker {worker.id} ({worker.full_name}).'
 
                 different: bool = False
                 user_value = getattr(user, user_property)
@@ -176,7 +177,7 @@ class UsersAPI:
                         user_value_str = ', '.join(final_value)
                         different = True
                         if action_type == UsersAPI.ACTION_TYPE_UPDATE:
-                            attributes[user_property] = final_value + [worker_value]
+                            attributes[ad_property] = final_value + [worker_value]
                             dirty = True
 
                 elif field_type in (UsersAPI.FIELD_TYPE_STR, UsersAPI.FIELD_TYPE_INT):
@@ -184,7 +185,7 @@ class UsersAPI:
                     if user_value_str != worker_value:
                         different = True
                         if action_type == UsersAPI.ACTION_TYPE_UPDATE:
-                            attributes[user_property] = worker_value
+                            attributes[ad_property] = worker_value
                             dirty = True
 
                 if different:
@@ -245,7 +246,6 @@ class UsersAPI:
                 f.close()
 
             logger.info(f'Wrote unlinked workers report to {settings.report_path_unlinked}.')
-
 
     @staticmethod
     def find_user_by_name(users: list[UserRecord], name: str) -> UserRecord | None:
