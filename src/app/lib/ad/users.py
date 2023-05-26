@@ -161,8 +161,7 @@ class UsersAPI:
                                        worker.phone_number))
                 dirty = True
 
-            if isinstance(worker.phone_number, str) and len(worker.phone_number.strip()) \
-                    and str(user.office_phone).strip() != str(worker.phone_number).strip():
+            if str(user.office_phone).strip() != str(worker.phone_number).strip():
                 logger.debug(f'Updating telephoneNumber for worker {worker.id} ({worker.full_name}).')
                 attributes['telephoneNumber'] = worker.phone_number
                 actions_report.append((worker.id, worker.full_name, 'telephoneNumber', 'UPDATE', user.office_phone,
